@@ -1,0 +1,43 @@
+package bookstore;
+
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+
+public class UserInterface {
+	private int userPower; //0 for unlogin, 1 for normal user, 2 for store manager;
+
+	static String usageInfo = "I'm the useless usage info... >_<";
+	
+	public UserInterface() throws Exception {
+		userPower = 0;
+	}
+
+	public void mainLoop() throws Exception {
+        BufferedReader buffer = new BufferedReader(new InputStreamReader(System.in));
+		while (true) {
+			String cmd;
+            while ((cmd = buffer.readLine()) == null || cmd.length() == 0) ;
+			System.out.println("!"+cmd+"!");
+			if (cmd == "0" || cmd == "exit") {
+				break;
+			} else if (cmd.equals("1") || cmd == "register") {
+				System.out.println("Cmd is register");
+			} else if (cmd == "2" || cmd == "login") {
+			} else if (cmd == "3" || cmd == "order") {
+			} else if (cmd == "4" || cmd == "newbook") {
+			} else if (cmd == "5" || cmd == "newcopy") {
+			} else if (cmd == "6" || cmd == "feedback") {
+			} else if (cmd == "7" || cmd == "ratebook") {
+			} else if (cmd == "8" || cmd == "trust") {
+			} else if (cmd == "9" || cmd == "browse") {
+			} else if (cmd == "10" || cmd == "usefull") {
+			} else if (cmd == "11" || cmd == "suggest") {
+			} else if (cmd == "12" || cmd == "seperate") {
+			} else if (cmd == "13" || cmd == "statics") {
+			} else if (cmd == "14" || cmd == "award") {
+			} else {
+				System.out.println("Command not recognized, usages:\n" + usageInfo);
+			}
+		}
+	}
+}
