@@ -237,7 +237,7 @@ public class Order {
 
 		try {
 			String isbn = nextString("Enter the book's isbn :", false);
-			int score = Integer.parseInt(nextString("Enter the score :", false));
+			int score = Integer.parseInt(nextString("Enter the score (0 ~ 10):", false));
 			String comment = nextString("Enter the comment (optional) :", true);
 			long timstamp = System.currentTimeMillis();
 
@@ -275,7 +275,76 @@ public class Order {
 				System.out.println("New Feedback added");
 				con.commit();
 			} catch (SQLException e ) {
-				System.err.print("Error when adding new copies :" + e.getMessage());
+				System.err.print("Error when adding new feedback :" + e.getMessage());
+			}
+		} catch (Exception e ) {
+			System.out.println("Errors in input");
+		} finally {
+			if (updateStatement != null) 
+				updateStatement.close();
+			con.setAutoCommit(true);
+		}
+		return 1;
+	}
+
+	public int rate(int userPower, int uid1)
+		throws Exception {
+		System.out.println("Cmd is rating");
+		if (userPower == 0) {
+			System.out.println("Unauthorized, only logined user can rate feedbacks");
+			return -1;
+		}
+
+		PreparedStatement updateStatement = null;
+		PreparedStatement queryStatement = null;
+
+		try {
+			String username = nextString("Enter that user's username :", false);
+			String isbn = nextString("Enter the book's isbn :", false);
+			int score = Integer.parseInt(nextString("Enter the score (0, 1, or 2):", false));
+			long timstamp = System.currentTimeMillis();
+
+
+			try {
+				String updateString =
+					"INSERT INTO Rating " + 
+					"(bid, uid0, uid1, score) VALUES " + 
+					"(?, ?, ?, ?)";
+			
+				con.setAutoCommit(false);
+
+				queryStatement = con.prepareStatement("SELECT bid FROM Book WHERE isbn = ?");
+				queryStatement.setString(1, isbn);
+				int bid = -1;
+				ResultSet res = queryStatement.executeQuery();
+				while (res.next()) 
+					bid = res.getInt("bid");
+				if (bid == -1) {
+					System.out.println("Unknown book, cannot rate");
+					return -1;
+				}
+
+				queryStatement = con.prepareStatement("SELECT uid FROM User WHERE username = ?");
+				queryStatement.setString(1, username);
+				int uid0 = -1;
+				res = queryStatement.executeQuery();
+				while (res.next()) 
+					uid0 = res.getInt("uid");
+				if (uid0 == -1) {
+					System.out.println("Unknown user, cannot rate");
+					return -1;
+				}
+
+				updateStatement = con.prepareStatement(updateString);
+				updateStatement.setInt(1, bid);
+				updateStatement.setInt(2, uid0);
+				updateStatement.setInt(3, uid1);
+				updateStatement.setInt(4, score);
+				updateStatement.executeUpdate();
+				System.out.println("New rating added");
+				con.commit();
+			} catch (SQLException e ) {
+				System.err.print("Error when adding new rating :" + e.getMessage());
 			}
 		} catch (Exception e ) {
 			System.out.println("Errors in input");

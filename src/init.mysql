@@ -47,5 +47,20 @@ CREATE TABLE Feedback (
         ON DELETE CASCADE
         ON UPDATE CASCADE,
     CHECK (score >= 0 && score <= 10)
+);
 
+CREATE TABLE Rating (
+    bid    INT,
+    uid0   INT,
+    uid1   INT,
+    score  INT,
+    PRIMARY KEY (uid0, uid1),
+	CHECK (uid0 != uid1),
+	CHECK (score >= 0 && score <= 2),
+    FOREIGN KEY (bid, uid0) REFERENCES Feedback (bid, uid)
+        ON UPDATE CASCADE
+        ON DELETE CASCADE,
+    FOREIGN KEY (uid1) REFERENCES User (uid)
+        ON UPDATE CASCADE
+        ON DELETE CASCADE
 );

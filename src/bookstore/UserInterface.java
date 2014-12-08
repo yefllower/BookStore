@@ -64,7 +64,8 @@ public class UserInterface {
 				res = order.newcopy(userPower);
 			} else if (cmd.equals("6") || cmd.equals("feedback")) {
 				res = order.feedback(userPower, uid);
-			} else if (cmd.equals("7") || cmd.equals("ratebook")) {
+			} else if (cmd.equals("7") || cmd.equals("rate")) {
+				res = order.rate(userPower, uid);
 			} else if (cmd.equals("8") || cmd.equals("trust")) {
 				System.out.println("Cmd is trust");
 			} else if (cmd.equals("9") || cmd.equals("browse")) {
