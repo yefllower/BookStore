@@ -34,7 +34,10 @@ public class UserInterface {
 		while (true) {
 			int res;
 			String cmd;
-			System.out.print("# ");
+			if (userPower == 2)
+				System.out.print("# ");
+			else
+				System.out.print("$ ");
             while ((cmd = buffer.readLine()) == null) ;
 			if (cmd.length() == 0)
 				continue;
