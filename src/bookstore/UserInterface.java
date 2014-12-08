@@ -74,7 +74,7 @@ public class UserInterface {
 				res = order.trust(userPower, uid);
 			} else if (cmd.equals("9") || cmd.equals("browse")) {
 				res = order.trust(userPower, uid);
-			} else if (cmd.equals("10") || cmd.equals("usefull")) {
+			} else if (cmd.equals("10") || cmd.equals("useful")) {
 			} else if (cmd.equals("11") || cmd.equals("suggest")) {
 			} else if (cmd.equals("12") || cmd.equals("seperate")) {
 			} else if (cmd.equals("13") || cmd.equals("statics")) {

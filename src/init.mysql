@@ -11,6 +11,12 @@ CREATE TABLE User (
     UNIQUE (username)
 );
 
+CREATE TABLE Publisher (
+    pid     INT AUTO_INCREMENT,
+    name    VARCHAR(256) NOT NULL,
+    PRIMARY KEY (pid)
+);
+
 CREATE TABLE Book (
     bid       INT AUTO_INCREMENT,
     isbn      VARCHAR(15),
@@ -23,14 +29,11 @@ CREATE TABLE Book (
     subject   VARCHAR(256),
     PRIMARY KEY (bid),
     UNIQUE (isbn),
+    FOREIGN KEY (publisher) REFERENCES Publisher (pid)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE,
     CHECK (stock >= 0),
     CHECK (price >= 0)
-);
-
-CREATE TABLE Publisher (
-    pid     INT AUTO_INCREMENT,
-    name    VARCHAR(256) NOT NULL,
-    PRIMARY KEY (pid)
 );
 
 CREATE TABLE Feedback (
