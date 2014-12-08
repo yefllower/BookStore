@@ -17,9 +17,15 @@ public class Order {
 		throws Exception {
 		System.out.println("cmd is register");
 		System.out.print("Enter your username :");
-		String username = next();
+		String username = next(false);
 		System.out.print("Enter your password :");
-		String password = next();
+		String password = next(false);
+		System.out.print("Enter your name (optional):");
+		String name = next(true);
+		System.out.print("Enter your address (optional):");
+		String address = next(true);
+		System.out.print("Enter your phone number (optional):");
+		String phonenum = next(true);
 		System.out.println("Registering user \"" + username + "\" with password \"" + password + "\"" );
 		int userPower;
 		if (username.equals("root")) userPower = 2; else userPower = 1;
@@ -27,8 +33,9 @@ public class Order {
 		PreparedStatement updateStatement = null;
 
 		String updateString =
-			"INSERT INTO User VALUES " +
-			"(?, ?, ?)";
+			"INSERT INTO User " + 
+			"(username, password, userpower, name, address, phonenum) VALUES " +
+			"(?, ?, ?, ?, ?, ?)";
 
 		try {
 			con.setAutoCommit(false);
@@ -36,7 +43,11 @@ public class Order {
 			updateStatement.setString(1, username);
 			updateStatement.setString(2, password);
 			updateStatement.setInt(3, userPower);
+			updateStatement.setString(4, name);
+			updateStatement.setString(5, address);
+			updateStatement.setString(6, phonenum);
 			updateStatement.executeUpdate();
+			System.out.println("Register Successful");
 			con.commit();
 		} catch (SQLException e ) {
 			System.err.print("Error when registering :" + e.getMessage());
@@ -52,9 +63,9 @@ public class Order {
 		throws Exception {
 		System.out.println("cmd is login");
 		System.out.print("Enter your username :");
-		String username = next();
+		String username = next(false);
 		System.out.print("Enter your password :");
-		String password = next();
+		String password = next(false);
 		System.out.println("user \"" + username + "\" trying to login with password \"" + password + "\"" );
 		int userPower = -1;
 
@@ -62,7 +73,7 @@ public class Order {
 
 		String queryString =
 			"SELECT * FROM User " + 
-			"WHERE username=? and password=?";
+			"WHERE user=? and passwd=?";
 
 		try {
 			con.setAutoCommit(false);
@@ -80,7 +91,7 @@ public class Order {
 			res.close();
 			con.commit();
 		} catch (SQLException e ) {
-			System.err.print("Error when registering :" + e.getMessage());
+			System.err.print("Error when trying to login :" + e.getMessage());
 		} finally {
 			if (queryStatement != null) 
 				queryStatement.close();
@@ -89,9 +100,44 @@ public class Order {
 		return userPower;
 	}
 
-	private String next() throws Exception {
+	public int newbook(int userPower)
+		throws Exception {
+		System.out.println("Cmd is newbook");
+		if (userPower != 2) {
+			System.out.println("Unauthorized");
+			return -1;
+		}
+
+		PreparedStatement queryStatement = null;
+
+		String queryString =
+			"SELECT * FROM User " + 
+			"WHERE username=? and password=?";
+
+		try {
+			con.setAutoCommit(false);
+			queryStatement = con.prepareStatement(queryString);
+			ResultSet res = queryStatement.executeQuery();
+			res.close();
+			con.commit();
+		} catch (SQLException e ) {
+			System.err.print("Error when trying to login :" + e.getMessage());
+		} finally {
+			if (queryStatement != null) 
+				queryStatement.close();
+			con.setAutoCommit(true);
+		}
+		return 1;
+	}
+	
+	private String next(Boolean acceptEmpty) throws Exception {
 		String s;
-		while ((s = buffer.readLine()) == null || s.length() == 0) ;
+		while ((s = buffer.readLine()) == null) {
+			if (s != null) {
+				if (acceptEmpty || s.length() != 0)
+					break;
+			}
+		}
 		return s;
 	}
 }

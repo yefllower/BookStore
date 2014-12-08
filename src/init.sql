@@ -1,9 +1,17 @@
+
 CREATE TABLE User (
-	username VARCHAR(32) NOT NULL,
-	password VARCHAR(64) NOT NULL,
+    uid     INT,
+    username  VARCHAR(32)  NOT NULL,
+    password  VARCHAR(256) NOT NULL,
+    name      VARCHAR(256),
+    address   VARCHAR(1024),
+    phonenum  CHAR(20),
 	userpower INT NOT NULL,
-	PRIMARY KEY (username)
+    PRIMARY KEY (uid),
+    UNIQUE (username)
 );
+
+
 
 CREATE TABLE Publisher (
     pid     INT,
@@ -76,17 +84,6 @@ CREATE TABLE Author (
     FOREIGN KEY (aid) REFERENCES Writer (aid)
         ON UPDATE CASCADE
         ON DELETE RESTRICT
-);
-
-CREATE TABLE Customer (
-    uid     INT,
-    user    VARCHAR(32)  NOT NULL,
-    passwd  VARCHAR(256) NOT NULL,
-    name    VARCHAR(256) NOT NULL,
-    address VARCHAR(1024),
-    tel     CHAR(20),
-    PRIMARY KEY (uid),
-    UNIQUE (user)
 );
 
 CREATE TABLE Feedback (

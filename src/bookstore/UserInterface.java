@@ -15,8 +15,8 @@ public class UserInterface {
 		"  1. register            " + "\n" + 
 		"  2. login               " + "\n" + 
 		"  3. exit                " + "\n" + 
-		"  4. exit                " + "\n" + 
-		"  5. exit                " + "\n" + 
+		"  4. newbook             " + "\n" + 
+		"  5. newcopy             " + "\n" + 
 		"  6. exit                " + "\n" + 
 		"  7. exit                " + "\n" + 
 		"  8. exit                " + "\n" + 
@@ -34,13 +34,16 @@ public class UserInterface {
 		while (true) {
 			int res;
 			String cmd;
+		
 			if (userPower == 2)
 				System.out.print("# ");
 			else
 				System.out.print("$ ");
-            while ((cmd = buffer.readLine()) == null) ;
+            
+			while ((cmd = buffer.readLine()) == null) ;
 			if (cmd.length() == 0)
 				continue;
+
 			if (cmd.equals("0") || cmd.equals("exit")) {
 				break;
 			} else if (cmd.equals("1") || cmd.equals("register")) {
@@ -52,9 +55,8 @@ public class UserInterface {
 						System.out.println("You've logined as manager");
 				userPower = res;
 			} else if (cmd.equals("3") || cmd.equals("order")) {
-				System.out.println("Cmd is order");
 			} else if (cmd.equals("4") || cmd.equals("newbook")) {
-				System.out.println("Cmd is newbook");
+				res = order.newbook(userPower);
 			} else if (cmd.equals("5") || cmd.equals("newcopy")) {
 			} else if (cmd.equals("6") || cmd.equals("feedback")) {
 			} else if (cmd.equals("7") || cmd.equals("ratebook")) {
