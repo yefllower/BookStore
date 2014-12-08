@@ -45,6 +45,7 @@ int main() {
 		}
 	}
 	puts("");
+	puts("0");
 	return 0;
 }
 

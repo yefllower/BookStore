@@ -179,6 +179,8 @@ public class Order {
 		} finally {
 			if (updateStatement != null) 
 				updateStatement.close();
+			if (queryStatement != null) 
+				queryStatement.close();
 			con.setAutoCommit(true);
 		}
 		return userPower;
@@ -282,6 +284,8 @@ public class Order {
 		} finally {
 			if (updateStatement != null) 
 				updateStatement.close();
+			if (queryStatement != null) 
+				queryStatement.close();
 			con.setAutoCommit(true);
 		}
 		return 1;
@@ -349,6 +353,8 @@ public class Order {
 		} finally {
 			if (updateStatement != null) 
 				updateStatement.close();
+			if (queryStatement != null) 
+				queryStatement.close();
 			con.setAutoCommit(true);
 		}
 		return 1;
@@ -405,11 +411,60 @@ public class Order {
 		} finally {
 			if (updateStatement != null) 
 				updateStatement.close();
+			if (queryStatement != null) 
+				queryStatement.close();
 			con.setAutoCommit(true);
 		}
 		return 1;
 	}
 
+	public int useful(int userPower, int uid1)
+		throws Exception {
+		System.out.println("Cmd is useful");
+
+		PreparedStatement queryStatement = null;
+
+		try {
+			String isbn = nextString("Enter the book's isbn :", false);
+			int number = Integer.parseInt(nextString("Enter the number of showing items:", false));
+
+			try {
+				String queryString =
+					"SELECT * FROM ( " +
+					"    SELECT AVG(r.score) as rating, u.username, f.score, f.comment " +
+					"    FROM Rating r, Feedback f, Book b, User u " + 
+					"    WHERE r.bid=f.bid and r.uid0=f.uid and f.bid=b.bid and b.isbn=? and u.uid=f.uid " + 
+					"    GROUP BY r.uid0) AS fb " + 
+					"ORDER BY fb.rating DESC LIMIT ? ";
+
+				con.setAutoCommit(false);
+
+				queryStatement = con.prepareStatement(queryString);
+				queryStatement.setString(1, isbn);
+				queryStatement.setInt(2, number);
+				ResultSet res = queryStatement.executeQuery();
+				System.out.println("Query of trending feedbacks returned");
+				System.out.println(String.format(" %7s %10s %7s %s", "rating", "username", "score", "comment"));
+				while (res.next()) {
+					Float rating = res.getFloat("rating"); 
+					String username = res.getString("username"); 
+					int score = res.getInt("score"); 
+					String comment = res.getString("comment");
+					System.out.println(String.format(" %7.3f %10s %7d %s", rating, username, score, comment));
+				}
+				con.commit();
+			} catch (SQLException e ) {
+				System.err.print("Error when querying trending feedbacks :" + e.getMessage());
+			}
+		} catch (Exception e ) {
+			System.out.println("Errors in input");
+		} finally {
+			if (queryStatement != null) 
+				queryStatement.close();
+			con.setAutoCommit(true);
+		}
+		return 1;
+	}
 
 
 	private String next(Boolean acceptEmpty) throws Exception {
