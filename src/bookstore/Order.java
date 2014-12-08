@@ -16,41 +16,42 @@ public class Order {
 	public int register()
 		throws Exception {
 		System.out.println("cmd is register");
-		System.out.print("Enter your username :");
-		String username = next(false);
-		System.out.print("Enter your password :");
-		String password = next(false);
-		System.out.print("Enter your name (optional):");
-		String name = next(true);
-		System.out.print("Enter your address (optional):");
-		String address = next(true);
-		System.out.print("Enter your phone number (optional):");
-		String phonenum = next(true);
-		System.out.println("Registering user \"" + username + "\" with password \"" + password + "\"" );
-		int userPower;
-		if (username.equals("root")) userPower = 2; else userPower = 1;
 
 		PreparedStatement updateStatement = null;
-
-		String updateString =
-			"INSERT INTO User " + 
-			"(username, password, userpower, name, address, phonenum) VALUES " +
-			"(?, ?, ?, ?, ?, ?)";
+		int userPower = 0;
 
 		try {
-			con.setAutoCommit(false);
-			updateStatement = con.prepareStatement(updateString);
-			updateStatement.setString(1, username);
-			updateStatement.setString(2, password);
-			updateStatement.setInt(3, userPower);
-			updateStatement.setString(4, name);
-			updateStatement.setString(5, address);
-			updateStatement.setString(6, phonenum);
-			updateStatement.executeUpdate();
-			System.out.println("Register Successful");
-			con.commit();
-		} catch (SQLException e ) {
-			System.err.print("Error when registering :" + e.getMessage());
+			String username = nextString("Enter your username :", false);
+			String password = nextString("Enter your password :", false);
+			String name = nextString("Enter your name (optional):", true);
+			String address = nextString("Enter your address (optional):", true);
+			String phonenum = nextString("Enter your phone number (optional):", true);
+			System.out.println("Registering user \"" + username + "\" with password \"" + password + "\"" );
+			if (username.equals("root")) userPower = 2; else userPower = 1;
+
+
+			try {
+				String updateString =
+					"INSERT INTO User " + 
+					"(username, password, userpower, name, address, phonenum) VALUES " +
+					"(?, ?, ?, ?, ?, ?)";
+
+				con.setAutoCommit(false);
+				updateStatement = con.prepareStatement(updateString);
+				updateStatement.setString(1, username);
+				updateStatement.setString(2, password);
+				updateStatement.setInt(3, userPower);
+				updateStatement.setString(4, name);
+				updateStatement.setString(5, address);
+				updateStatement.setString(6, phonenum);
+				updateStatement.executeUpdate();
+				System.out.println("Register Successful");
+				con.commit();
+			} catch (SQLException e ) {
+				System.err.print("Error when registering :" + e.getMessage());
+			}
+		} catch (Exception e ) {
+			System.out.println("Errors in input");
 		} finally {
 			if (updateStatement != null) 
 				updateStatement.close();
@@ -62,36 +63,40 @@ public class Order {
 	public int login()
 		throws Exception {
 		System.out.println("cmd is login");
-		System.out.print("Enter your username :");
-		String username = next(false);
-		System.out.print("Enter your password :");
-		String password = next(false);
-		System.out.println("user \"" + username + "\" trying to login with password \"" + password + "\"" );
-		int userPower = -1;
 
 		PreparedStatement queryStatement = null;
-
-		String queryString =
-			"SELECT * FROM User " + 
-			"WHERE user=? and passwd=?";
+		int userPower = -1;
 
 		try {
-			con.setAutoCommit(false);
-			queryStatement = con.prepareStatement(queryString);
-			queryStatement.setString(1, username);
-			queryStatement.setString(2, password);
-			ResultSet res = queryStatement.executeQuery();
-			while (res.next()) {
-				userPower = res.getInt("userpower");
+			String username = nextString("Enter your username :", false);
+			String password = nextString("Enter your password :", false);
+			System.out.println("user \"" + username + "\" trying to login with password \"" + password + "\"" );
+
+
+			try {
+				String queryString =
+					"SELECT * FROM User " + 
+					"WHERE username=? and password=?";
+
+				con.setAutoCommit(false);
+				queryStatement = con.prepareStatement(queryString);
+				queryStatement.setString(1, username);
+				queryStatement.setString(2, password);
+				ResultSet res = queryStatement.executeQuery();
+				while (res.next()) {
+					userPower = res.getInt("userpower");
+				}
+				if (userPower == -1)
+					System.out.println("Login unsuccessful");
+				else
+					System.out.println("Login Successful!");
+				res.close();
+				con.commit();
+			} catch (SQLException e ) {
+				System.err.print("Error when trying to login :" + e.getMessage());
 			}
-			if (userPower == -1)
-				System.out.println("Login unsuccessful");
-			else
-				System.out.println("Login Successful!");
-			res.close();
-			con.commit();
-		} catch (SQLException e ) {
-			System.err.print("Error when trying to login :" + e.getMessage());
+		} catch (Exception e ) {
+			System.out.println("Errors in input");
 		} finally {
 			if (queryStatement != null) 
 				queryStatement.close();
@@ -104,41 +109,92 @@ public class Order {
 		throws Exception {
 		System.out.println("Cmd is newbook");
 		if (userPower != 2) {
-			System.out.println("Unauthorized");
+			System.out.println("Unauthorized, only manager can add new books");
 			return -1;
 		}
 
+		PreparedStatement updateStatement = null;
 		PreparedStatement queryStatement = null;
 
-		String queryString =
-			"SELECT * FROM User " + 
-			"WHERE username=? and password=?";
-
 		try {
-			con.setAutoCommit(false);
-			queryStatement = con.prepareStatement(queryString);
-			ResultSet res = queryStatement.executeQuery();
-			res.close();
-			con.commit();
-		} catch (SQLException e ) {
-			System.err.print("Error when trying to login :" + e.getMessage());
+			String isbn = nextString("Enter book's isbn :", false);
+			String title = nextString("Enter book's title :", false);
+			String publisher = nextString("Enter book's publisher name :", false);
+			int year = Integer.parseInt(nextString("Enter book's year :", false));
+			int stock = Integer.parseInt(nextString("Enter book's number of copies :", false));
+			Float price = Float.parseFloat(nextString("Enter book's price :", false));
+			String format = nextString("Enter book's format (hardcover/softcover, softcover by default) :", true);
+			if (format.length() == 0) format = "softcover";
+			String subject = nextString("Enter book's subject (optional) :", true);
+
+			try {
+				String updateString =
+					"INSERT INTO Book " + 
+					"(isbn, title, publisher, year, stock, price, format, subject) VALUES " +
+					"(?, ?, ?, ?, ?, ?, ?, ?)";
+
+				String queryString = 
+					"SELECT pid FROM Publisher " + 
+					"WHERE name = ?";
+
+				con.setAutoCommit(false);
+
+				queryStatement = con.prepareStatement(queryString);
+				queryStatement.setString(1, publisher);
+				int pid = -1;
+				ResultSet res = queryStatement.executeQuery();
+				while (res.next()) 
+					pid = res.getInt("pid");
+				if (pid == -1) {
+					System.out.println("Unknown publisher, added to Publisher");
+					updateStatement = con.prepareStatement("INSERT INTO Publisher (name) VALUES (?)");
+					updateStatement.setString(1, publisher);
+					updateStatement.executeUpdate();
+				}	
+				res = queryStatement.executeQuery();
+				while (res.next()) 
+					pid = res.getInt("pid");
+				System.out.println("pid is " + pid);
+
+				updateStatement = con.prepareStatement(updateString);
+				updateStatement.setString(1, isbn);
+				updateStatement.setString(2, title);
+				updateStatement.setInt(3, pid);
+				updateStatement.setInt(4, year);
+				updateStatement.setInt(5, stock);
+				updateStatement.setFloat(6, price);
+				updateStatement.setString(7, format);
+				updateStatement.setString(8, subject);
+				updateStatement.executeUpdate();
+				System.out.println("New book added");
+				con.commit();
+			} catch (SQLException e ) {
+				System.err.print("Error when registering :" + e.getMessage());
+			}
+		} catch (Exception e ) {
+			System.out.println("Errors in input");
 		} finally {
-			if (queryStatement != null) 
-				queryStatement.close();
+			if (updateStatement != null) 
+				updateStatement.close();
 			con.setAutoCommit(true);
 		}
-		return 1;
+		return userPower;
 	}
-	
+
 	private String next(Boolean acceptEmpty) throws Exception {
 		String s;
-		while ((s = buffer.readLine()) == null) {
+		while (true) {
+			s = buffer.readLine();
 			if (s != null) {
 				if (acceptEmpty || s.length() != 0)
 					break;
 			}
 		}
 		return s;
+	}
+	private String nextString(String hint, Boolean acceptEmpty) throws Exception {
+		System.out.print(hint);
+		return next(acceptEmpty);
 	}
 }
 

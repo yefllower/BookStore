@@ -1,0 +1,35 @@
+
+CREATE TABLE User (
+    uid     INT AUTO_INCREMENT,
+    username  VARCHAR(32)  NOT NULL,
+    password  VARCHAR(256) NOT NULL,
+    name      VARCHAR(256),
+    address   VARCHAR(1024),
+    phonenum  CHAR(20),
+	userpower INT NOT NULL,
+    PRIMARY KEY (uid),
+    UNIQUE (username)
+);
+
+CREATE TABLE Book (
+    bid       INT AUTO_INCREMENT,
+    isbn      VARCHAR(15),
+    title     VARCHAR(256) NOT NULL,
+    publisher INT          NOT NULL,
+    year      INT          NOT NULL,
+    stock     INT          NOT NULL,
+    price     REAL         NOT NULL,
+    format    ENUM('hardcover', 'softcover') NOT NULL,
+    subject   VARCHAR(256),
+    PRIMARY KEY (bid),
+    UNIQUE (isbn),
+    CHECK (stock >= 0),
+    CHECK (price >= 0)
+);
+
+CREATE TABLE Publisher (
+    pid     INT AUTO_INCREMENT,
+    name    VARCHAR(256) NOT NULL,
+    PRIMARY KEY (pid)
+);
+
