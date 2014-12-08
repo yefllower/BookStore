@@ -15,8 +15,8 @@ To run:
 make run
 ```
 
-To run a siily test:
+To run a siily test from test1.in:
 ```bash
-make test
+make test1
 ```
 
