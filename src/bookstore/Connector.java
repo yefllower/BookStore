@@ -4,7 +4,6 @@ import java.sql.*;
 
 public class Connector {
 	public Connection con;
-	public Statement stmt;
 	public Connector() throws Exception {
 		System.out.println("Connecting the specified database...");
 		try{
@@ -14,7 +13,6 @@ public class Connector {
 //			String url = "jdbc:mysql://localhost";
 			Class.forName ("com.mysql.jdbc.Driver").newInstance ();
 			con = DriverManager.getConnection (url, userName, password);
-			stmt = con.createStatement();
 			System.out.println("Database connected...");
 		} catch(Exception e) {
 			System.err.println("Unable to open mysql jdbc connection. The error is as follows,\n");

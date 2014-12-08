@@ -6,7 +6,7 @@ import java.sql.*;
 
 public class UserInterface {
 	private int userPower; //0 for unlogin, 1 for normal user, 2 for store manager;
-	private Statement stmt;
+	private Connection con;
 	private Order order;
     private BufferedReader buffer;
 
@@ -23,11 +23,11 @@ public class UserInterface {
 		"  9. exit                " + "\n" + 
 		"  Have fun!";
 	
-	public UserInterface(Statement stmts) throws Exception {
+	public UserInterface(Connection conn) throws Exception {
 		userPower = 0;
-		stmt = stmts;
+		con = conn;
 		buffer = new BufferedReader(new InputStreamReader(System.in));
-		order = new Order(stmts, buffer);
+		order = new Order(conn, buffer);
 	}
 
 	public void mainLoop() throws Exception {
