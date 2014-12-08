@@ -22,6 +22,10 @@ public class UserInterface {
 		"  7. rate                " + "\n" + 
 		"  8. trust               " + "\n" + 
 		"  9. exit                " + "\n" + 
+		" 10. exit                " + "\n" + 
+		" 11. exit                " + "\n" + 
+		" 12. exit                " + "\n" + 
+		" 13. exit                " + "\n" + 
 		"  Have fun!";
 	
 	public UserInterface(Connection conn) throws Exception {
@@ -69,6 +73,7 @@ public class UserInterface {
 			} else if (cmd.equals("8") || cmd.equals("trust")) {
 				res = order.trust(userPower, uid);
 			} else if (cmd.equals("9") || cmd.equals("browse")) {
+				res = order.trust(userPower, uid);
 			} else if (cmd.equals("10") || cmd.equals("usefull")) {
 			} else if (cmd.equals("11") || cmd.equals("suggest")) {
 			} else if (cmd.equals("12") || cmd.equals("seperate")) {
