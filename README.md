@@ -7,7 +7,9 @@ Usages
 =========
 To compile:
 
+'''bash
 make
+'''
 
 To run:
 
