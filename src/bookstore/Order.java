@@ -302,8 +302,6 @@ public class Order {
 			String username = nextString("Enter that user's username :", false);
 			String isbn = nextString("Enter the book's isbn :", false);
 			int score = Integer.parseInt(nextString("Enter the score (0, 1, or 2):", false));
-			long timstamp = System.currentTimeMillis();
-
 
 			try {
 				String updateString =
@@ -355,6 +353,64 @@ public class Order {
 		}
 		return 1;
 	}
+
+	public int trust(int userPower, int uid1)
+		throws Exception {
+		System.out.println("Cmd is trust");
+		if (userPower == 0) {
+			System.out.println("Unauthorized, only logined user can modify trusting");
+			return -1;
+		}
+
+		PreparedStatement updateStatement = null;
+		PreparedStatement queryStatement = null;
+
+		try {
+			String username = nextString("Enter that user's username :", false);
+			String trustString = nextString("Enter trusted or untrusted (trusted by default) :", true);
+			if (trustString.length() == 0)
+				trustString = "trusted";
+
+			try {
+				String updateString =
+					"INSERT INTO Trust " + 
+					"(uid0, uid1, trust) VALUES " + 
+					"(?, ?, ?)";
+			
+				con.setAutoCommit(false);
+
+				queryStatement = con.prepareStatement("SELECT uid FROM User WHERE username = ?");
+				queryStatement.setString(1, username);
+				int uid0 = -1;
+			 	ResultSet res = queryStatement.executeQuery();
+				while (res.next()) 
+					uid0 = res.getInt("uid");
+				if (uid0 == -1) {
+					System.out.println("Unknown user, cannot trust");
+					return -1;
+				}
+
+				updateStatement = con.prepareStatement(updateString);
+				updateStatement.setInt(1, uid0);
+				updateStatement.setInt(2, uid1);
+				updateStatement.setBoolean(3, trustString.equals("trusted"));
+				updateStatement.executeUpdate();
+				System.out.println("New trusting added");
+				con.commit();
+			} catch (SQLException e ) {
+				System.err.print("Error when adding new trusting :" + e.getMessage());
+			}
+		} catch (Exception e ) {
+			System.out.println("Errors in input");
+		} finally {
+			if (updateStatement != null) 
+				updateStatement.close();
+			con.setAutoCommit(true);
+		}
+		return 1;
+	}
+
+
 
 	private String next(Boolean acceptEmpty) throws Exception {
 		String s;

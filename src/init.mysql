@@ -54,10 +54,23 @@ CREATE TABLE Rating (
     uid0   INT,
     uid1   INT,
     score  INT,
-    PRIMARY KEY (uid0, uid1),
+    PRIMARY KEY (bid, uid0, uid1),
 	CHECK (uid0 != uid1),
 	CHECK (score >= 0 && score <= 2),
     FOREIGN KEY (bid, uid0) REFERENCES Feedback (bid, uid)
+        ON UPDATE CASCADE
+        ON DELETE CASCADE,
+    FOREIGN KEY (uid1) REFERENCES User (uid)
+        ON UPDATE CASCADE
+        ON DELETE CASCADE
+);
+
+CREATE TABLE Trust (
+    uid0   INT,
+    uid1   INT,
+	trust  BOOLEAN,
+    PRIMARY KEY (uid0, uid1),
+    FOREIGN KEY (uid0) REFERENCES User (uid)
         ON UPDATE CASCADE
         ON DELETE CASCADE,
     FOREIGN KEY (uid1) REFERENCES User (uid)

@@ -18,9 +18,9 @@ public class UserInterface {
 		"  3. exit                " + "\n" + 
 		"  4. newbook             " + "\n" + 
 		"  5. newcopy             " + "\n" + 
-		"  6. exit                " + "\n" + 
-		"  7. exit                " + "\n" + 
-		"  8. exit                " + "\n" + 
+		"  6. feedback            " + "\n" + 
+		"  7. rate                " + "\n" + 
+		"  8. trust               " + "\n" + 
 		"  9. exit                " + "\n" + 
 		"  Have fun!";
 	
@@ -40,7 +40,7 @@ public class UserInterface {
 			if (userPower == 2)
 				System.out.print("# ");
 			else
-				System.out.print("$ ");
+				System.out.print("> ");
             
 			while ((cmd = buffer.readLine()) == null) ;
 			if (cmd.length() == 0)
@@ -67,7 +67,7 @@ public class UserInterface {
 			} else if (cmd.equals("7") || cmd.equals("rate")) {
 				res = order.rate(userPower, uid);
 			} else if (cmd.equals("8") || cmd.equals("trust")) {
-				System.out.println("Cmd is trust");
+				res = order.trust(userPower, uid);
 			} else if (cmd.equals("9") || cmd.equals("browse")) {
 			} else if (cmd.equals("10") || cmd.equals("usefull")) {
 			} else if (cmd.equals("11") || cmd.equals("suggest")) {
