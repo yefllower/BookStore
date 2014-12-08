@@ -1,3 +1,10 @@
+CREATE TABLE User (
+	username VARCHAR(32) NOT NULL,
+	password VARCHAR(64) NOT NULL,
+	userpower INT NOT NULL,
+	PRIMARY KEY (username)
+);
+
 CREATE TABLE Publisher (
     pid     INT,
     name    VARCHAR(256) NOT NULL,
