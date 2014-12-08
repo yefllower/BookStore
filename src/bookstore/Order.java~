@@ -24,43 +24,43 @@ public class Order {
 		int userPower;
 		if (username.equals("root")) userPower = 2; else userPower = 1;
 
-		PreparedStatement updateStatement = null;
+		PreparedStatement insertStatement = null;
 
-		String updateString =
+		String insertString =
 			"INSERT INTO User VALUES " +
 			"(?, ?, ?)";
 
 		try {
 			con.setAutoCommit(false);
-			updateStatement = con.prepareStatement(updateString);
-			updateStatement.setString(1, username);
-			updateStatement.setString(2, password);
-			updateStatement.setInt(3, userPower);
-			updateStatement.executeUpdate();
+			insertStatement = con.prepareStatement(insertString);
+			insertStatement.setString(1, username);
+			insertStatement.setString(2, password);
+			insertStatement.setInt(3, userPower);
+			insertStatement.executeUpdate();
 			con.commit();
 		} catch (SQLException e ) {
 			System.err.print("Error when registering :" + e.getMessage());
 		} finally {
-			if (updateStatement != null) 
-				updateStatement.close();
+			if (insertStatement != null) 
+				insertStatement.close();
 			con.setAutoCommit(true);
 		}
 		return userPower;
 	}
 
 	public int login()
-		throws Exception {
+		throws SQLException {
 		System.out.println("cmd is login");
 		System.out.print("Enter your username :");
 		String username = next();
 		System.out.print("Enter your password :");
 		String password = next();
 		System.out.println("user \"" + username + "\" trying to login with password \"" + password + "\"" );
-		int userPower = -1;
+		int userPower;
 
 		PreparedStatement queryStatement = null;
 
-		String queryString =
+		String insertString =
 			"SELECT * FROM User " + 
 			"WHERE username=? and password=?";
 
@@ -69,16 +69,11 @@ public class Order {
 			queryStatement = con.prepareStatement(queryString);
 			queryStatement.setString(1, username);
 			queryStatement.setString(2, password);
-			ResultSet res = queryStatement.executeQuery();
-			while (res.next()) {
-				userPower = res.getInt("userpower");
-			}
-			if (userPower == -1)
-				System.out.println("Login unsuccessful");
-			else
-				System.out.println("Login Successful!");
-			res.close();
+			queryStatement.setInt(3, userPower);
+			resultSet res = queryStatement.executeQuery();
+			System.out.println("!" + ("!" + res.getFetchSize()));
 			con.commit();
+			System.out.println("!" + ("!" + res.getFetchSize()));
 		} catch (SQLException e ) {
 			System.err.print("Error when registering :" + e.getMessage());
 		} finally {
@@ -86,7 +81,12 @@ public class Order {
 				queryStatement.close();
 			con.setAutoCommit(true);
 		}
-		return userPower;
+		return 1;
+	}
+
+	private String next() throws Exception {
+		String s;
+		return 1;
 	}
 
 	private String next() throws Exception {

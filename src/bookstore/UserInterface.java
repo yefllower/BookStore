@@ -13,7 +13,7 @@ public class UserInterface {
 	static String usageInfo = 
 		"  0. exit                " + "\n" + 
 		"  1. register            " + "\n" + 
-		"  2. exit                " + "\n" + 
+		"  2. login               " + "\n" + 
 		"  3. exit                " + "\n" + 
 		"  4. exit                " + "\n" + 
 		"  5. exit                " + "\n" + 
@@ -44,6 +44,10 @@ public class UserInterface {
 				res = order.register();
 			} else if (cmd.equals("2") || cmd.equals("login")) {
 				res = order.login();
+				if (res == -1) res = 0;
+				if (userPower != res && res == 2)
+						System.out.println("You've logined as manager");
+				userPower = res;
 			} else if (cmd.equals("3") || cmd.equals("order")) {
 				System.out.println("Cmd is order");
 			} else if (cmd.equals("4") || cmd.equals("newbook")) {
