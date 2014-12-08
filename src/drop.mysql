@@ -1,0 +1,7 @@
+
+DROP TABLE Rating;
+DROP TABLE Feedback;
+DROP TABLE Trust;
+DROP TABLE User;
+DROP TABLE Book;
+DROP TABLE Publisher;
