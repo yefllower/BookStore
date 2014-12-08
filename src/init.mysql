@@ -1,12 +1,12 @@
 
 CREATE TABLE User (
-    uid     INT AUTO_INCREMENT,
+    uid          INT AUTO_INCREMENT,
     username  VARCHAR(32)  NOT NULL,
     password  VARCHAR(256) NOT NULL,
     name      VARCHAR(256),
     address   VARCHAR(1024),
     phonenum  CHAR(20),
-	userpower INT NOT NULL,
+    userpower INT NOT NULL,
     PRIMARY KEY (uid),
     UNIQUE (username)
 );
@@ -33,3 +33,19 @@ CREATE TABLE Publisher (
     PRIMARY KEY (pid)
 );
 
+CREATE TABLE Feedback (
+    bid      INT,
+    uid      INT,
+    score    INT NOT NULL,
+	dates    TIMESTAMP,
+    comment  TEXT,
+    PRIMARY KEY (bid, uid),
+    FOREIGN KEY (bid) REFERENCES Book (bid)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE,
+    FOREIGN KEY (uid) REFERENCES User (uid)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE,
+    CHECK (score >= 0 && score <= 10)
+
+);

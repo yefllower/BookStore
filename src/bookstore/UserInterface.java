@@ -6,6 +6,7 @@ import java.sql.*;
 
 public class UserInterface {
 	private int userPower; //0 for unlogin, 1 for normal user, 2 for store manager;
+	private int uid; // the uid of logined user, -1 for unlogin
 	private Connection con;
 	private Order order;
     private BufferedReader buffer;
@@ -25,6 +26,7 @@ public class UserInterface {
 	
 	public UserInterface(Connection conn) throws Exception {
 		userPower = 0;
+		uid = -1;
 		con = conn;
 		buffer = new BufferedReader(new InputStreamReader(System.in));
 		order = new Order(conn, buffer);
@@ -50,15 +52,18 @@ public class UserInterface {
 				res = order.register();
 			} else if (cmd.equals("2") || cmd.equals("login")) {
 				res = order.login();
-				if (res == -1) res = 0;
+				if (res == -1) continue;
 				if (userPower != res && res == 2)
 						System.out.println("You've logined as manager");
-				userPower = res;
+				userPower = res % 10;
+				uid = res / 10;
 			} else if (cmd.equals("3") || cmd.equals("order")) {
 			} else if (cmd.equals("4") || cmd.equals("newbook")) {
 				res = order.newbook(userPower);
 			} else if (cmd.equals("5") || cmd.equals("newcopy")) {
+				res = order.newcopy(userPower);
 			} else if (cmd.equals("6") || cmd.equals("feedback")) {
+				res = order.feedback(userPower, uid);
 			} else if (cmd.equals("7") || cmd.equals("ratebook")) {
 			} else if (cmd.equals("8") || cmd.equals("trust")) {
 				System.out.println("Cmd is trust");
