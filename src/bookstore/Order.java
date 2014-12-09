@@ -410,6 +410,10 @@ public class Order {
 					System.out.println("Unknown user, cannot rate");
 					return -1;
 				}
+				if (uid0 == uid1) {
+					System.out.println("Cannot rate your own feedback");
+					return -1;
+				}
 
 				updateStatement = con.prepareStatement(updateString);
 				updateStatement.setInt(1, bid);
@@ -529,6 +533,55 @@ public class Order {
 				con.commit();
 			} catch (SQLException e ) {
 				System.err.print("Error when querying trending feedbacks :" + e.getMessage());
+			}
+		} catch (Exception e ) {
+			System.out.println("Errors in input");
+		} finally {
+			if (queryStatement != null) 
+				queryStatement.close();
+			con.setAutoCommit(true);
+		}
+		return 1;
+	}
+	
+	public int suggest(int userPower, int uid)
+		throws Exception {
+		System.out.println("Cmd is suggest");
+		
+		if (userPower == 0) {
+			System.out.println("Unauthorized, only logined user can get suggestion");
+			return -1;
+		}
+
+		PreparedStatement queryStatement = null;
+
+		try {
+			String isbn = nextString("Enter the book's isbn :", false);
+
+			try {
+				String queryString =
+					"SELECT SUM(o2.number) as commonSales, Book.isbn "+
+					"FROM Book, Ordering o1, Ordering o2 "+
+					"WHERE o1.uid=o2.uid and o1.bid=Book.bid and Book.isbn=? and o2.uid != ? "+
+					"GROUP BY o2.bid "+
+					"ORDER BY commonSales DESC ";
+
+				con.setAutoCommit(false);
+
+				queryStatement = con.prepareStatement(queryString);
+				queryStatement.setString(1, isbn);
+				queryStatement.setInt(2, uid);
+				ResultSet res = queryStatement.executeQuery();
+				System.out.println("Query of suggested book  returned");
+				System.out.println(String.format(" %10s %7s", "isbn", "sales"));
+				while (res.next()) {
+					String isbns = res.getString("isbn"); 
+					int sales = res.getInt("commonSales"); 
+					System.out.println(String.format(" %10s %7s", isbns, sales));
+				}
+				con.commit();
+			} catch (SQLException e ) {
+				System.err.print("Error when querying suggested books :" + e.getMessage());
 			}
 		} catch (Exception e ) {
 			System.out.println("Errors in input");

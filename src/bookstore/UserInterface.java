@@ -23,7 +23,7 @@ public class UserInterface {
 		"  8. trust               " + "\n" + 
 		"  9. exit                " + "\n" + 
 		" 10. useful              " + "\n" + 
-		" 11. exit                " + "\n" + 
+		" 11. suggest             " + "\n" + 
 		" 12. exit                " + "\n" + 
 		" 13. exit                " + "\n" + 
 		" 14. award               " + "\n" + 
@@ -78,6 +78,7 @@ public class UserInterface {
 			} else if (cmd.equals("10") || cmd.equals("useful")) {
 				res = order.useful(userPower, uid);
 			} else if (cmd.equals("11") || cmd.equals("suggest")) {
+				res = order.suggest(userPower, uid);
 			} else if (cmd.equals("12") || cmd.equals("seperate")) {
 			} else if (cmd.equals("13") || cmd.equals("statics")) {
 			} else if (cmd.equals("14") || cmd.equals("award")) {

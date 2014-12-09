@@ -58,7 +58,6 @@ CREATE TABLE Rating (
     uid1   INT,
     score  INT,
     PRIMARY KEY (bid, uid0, uid1),
-	CHECK (uid0 != uid1),
 	CHECK (score >= 0 && score <= 2),
     FOREIGN KEY (bid, uid0) REFERENCES Feedback (bid, uid)
         ON UPDATE CASCADE
