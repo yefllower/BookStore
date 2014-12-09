@@ -84,7 +84,7 @@ public class UserInterface {
 			} else if (cmd.equals("14") || cmd.equals("award")) {
 				res = order.award(userPower, uid);
 			} else {
-				System.out.println("Command not recognized, usages:\n" + usageInfo);
+				System.out.println("Command '" + cmd + "' not recognized, usages:\n" + usageInfo);
 			}
 		}
 	}

@@ -36,7 +36,6 @@ public class Order {
 					"(username, password, userpower, name, address, phonenum) VALUES " +
 					"(?, ?, ?, ?, ?, ?)";
 
-				con.setAutoCommit(false);
 				updateStatement = con.prepareStatement(updateString);
 				updateStatement.setString(1, username);
 				updateStatement.setString(2, password);
@@ -46,7 +45,6 @@ public class Order {
 				updateStatement.setString(6, phonenum);
 				updateStatement.executeUpdate();
 				System.out.println("Register Successful");
-				con.commit();
 			} catch (SQLException e ) {
 				System.err.print("Error when registering :" + e.getMessage());
 			}
@@ -55,7 +53,6 @@ public class Order {
 		} finally {
 			if (updateStatement != null) 
 				updateStatement.close();
-			con.setAutoCommit(true);
 		}
 		return userPower;
 	}
@@ -79,7 +76,6 @@ public class Order {
 					"SELECT * FROM User " + 
 					"WHERE username=? and password=?";
 
-				con.setAutoCommit(false);
 				queryStatement = con.prepareStatement(queryString);
 				queryStatement.setString(1, username);
 				queryStatement.setString(2, password);
@@ -93,7 +89,6 @@ public class Order {
 				else
 					System.out.println("Login Successful!");
 				res.close();
-				con.commit();
 			} catch (SQLException e ) {
 				System.err.print("Error when trying to login :" + e.getMessage());
 			}
@@ -102,7 +97,6 @@ public class Order {
 		} finally {
 			if (queryStatement != null) 
 				queryStatement.close();
-			con.setAutoCommit(true);
 		}
 		if (userPower == -1) return -1;
 		return uid * 10 + userPower;
@@ -133,7 +127,6 @@ public class Order {
 					"(bid, uid, number, dates) VALUES " +
 					"(?, ?, ?, ?)";
 
-				con.setAutoCommit(false);
 
 				queryStatement = con.prepareStatement("SELECT bid, price, stock FROM Book WHERE isbn = ?");
 				queryStatement.setString(1, isbn);
@@ -158,7 +151,7 @@ public class Order {
 				updateStatement.setTimestamp(4, new Timestamp(timstamp));
 				updateStatement.executeUpdate();
 				sumPrice = price * number;
-				System.out.println("New ordering added " + String.format("%.2f", sumPrice));
+				System.out.println("New ordering added, Total cost is " + String.format("%.2f", sumPrice));
 
 				updateStatement = con.prepareStatement("UPDATE Book SET stock=stock-? WHERE isbn=?");
 				updateStatement.setInt(1, number);
@@ -166,7 +159,6 @@ public class Order {
 				updateStatement.executeUpdate();
 				System.out.println("Book stock info updated ");
 
-				con.commit();
 			} catch (SQLException e ) {
 				System.err.print("Error when adding new book:" + e.getMessage());
 			}
@@ -177,7 +169,6 @@ public class Order {
 				updateStatement.close();
 			if (queryStatement != null) 
 				queryStatement.close();
-			con.setAutoCommit(true);
 		}
 		return sumPrice;
 	}
@@ -192,6 +183,7 @@ public class Order {
 
 		PreparedStatement updateStatement = null;
 		PreparedStatement queryStatement = null;
+		Boolean ok = false;
 
 		try {
 			String isbn = nextString("Enter book's isbn :", false);
@@ -232,7 +224,6 @@ public class Order {
 					}
 				}
 
-				con.setAutoCommit(false);
 
 				queryStatement = con.prepareStatement(queryString);
 				queryStatement.setString(1, publisher);
@@ -262,6 +253,7 @@ public class Order {
 				updateStatement.setString(8, subject);
 				updateStatement.executeUpdate();
 				System.out.println("New book added");
+				ok = true;
 
 				int bid = -1;
 				queryStatement = con.prepareStatement("SELECT bid FROM Book WHERE isbn = ?");
@@ -284,9 +276,11 @@ public class Order {
 					updateStatement.executeUpdate();
 				}
 
-				con.commit();
 			} catch (SQLException e ) {
-				System.err.print("Error when adding new book:" + e.getMessage());
+				if (!ok)
+					System.err.print("Error when adding new book:" + e.getMessage());
+				else
+					System.err.print("Error when adding new written:" + e.getMessage());
 			}
 		} catch (Exception e ) {
 			System.out.println("Errors in input");
@@ -295,7 +289,6 @@ public class Order {
 				updateStatement.close();
 			if (queryStatement != null) 
 				queryStatement.close();
-			con.setAutoCommit(true);
 		}
 		return userPower;
 	}
@@ -319,14 +312,12 @@ public class Order {
 					"UPDATE Book SET stock=stock+? " +
 					"WHERE isbn=?";
 
-				con.setAutoCommit(false);
 
 				updateStatement = con.prepareStatement(updateString);
 				updateStatement.setString(1, isbn);
 				updateStatement.setInt(2, delta);
 				updateStatement.executeUpdate();
 				System.out.println("New copies added");
-				con.commit();
 			} catch (SQLException e ) {
 				System.err.print("Error when adding new copies :" + e.getMessage());
 			}
@@ -335,7 +326,6 @@ public class Order {
 		} finally {
 			if (updateStatement != null) 
 				updateStatement.close();
-			con.setAutoCommit(true);
 		}
 		return userPower;
 	}
@@ -368,7 +358,6 @@ public class Order {
 					"SELECT bid FROM Book " + 
 					"WHERE isbn = ?";
 
-				con.setAutoCommit(false);
 
 				queryStatement = con.prepareStatement(queryString);
 				queryStatement.setString(1, isbn);
@@ -389,7 +378,6 @@ public class Order {
 				updateStatement.setString(5, comment);
 				updateStatement.executeUpdate();
 				System.out.println("New Feedback added");
-				con.commit();
 			} catch (SQLException e ) {
 				System.err.print("Error when adding new feedback :" + e.getMessage());
 			}
@@ -400,7 +388,6 @@ public class Order {
 				updateStatement.close();
 			if (queryStatement != null) 
 				queryStatement.close();
-			con.setAutoCommit(true);
 		}
 		return 1;
 	}
@@ -427,7 +414,6 @@ public class Order {
 					"(bid, uid0, uid1, score) VALUES " + 
 					"(?, ?, ?, ?)";
 			
-				con.setAutoCommit(false);
 
 				queryStatement = con.prepareStatement("SELECT bid FROM Book WHERE isbn = ?");
 				queryStatement.setString(1, isbn);
@@ -462,7 +448,6 @@ public class Order {
 				updateStatement.setInt(4, score);
 				updateStatement.executeUpdate();
 				System.out.println("New rating added");
-				con.commit();
 			} catch (SQLException e ) {
 				System.err.print("Error when adding new rating :" + e.getMessage());
 			}
@@ -473,7 +458,6 @@ public class Order {
 				updateStatement.close();
 			if (queryStatement != null) 
 				queryStatement.close();
-			con.setAutoCommit(true);
 		}
 		return 1;
 	}
@@ -501,7 +485,6 @@ public class Order {
 					"(uid0, uid1, trust) VALUES " + 
 					"(?, ?, ?)";
 			
-				con.setAutoCommit(false);
 
 				queryStatement = con.prepareStatement("SELECT uid FROM User WHERE username = ?");
 				queryStatement.setString(1, username);
@@ -520,7 +503,6 @@ public class Order {
 				updateStatement.setBoolean(3, trustString.equals("trusted"));
 				updateStatement.executeUpdate();
 				System.out.println("New trusting added");
-				con.commit();
 			} catch (SQLException e ) {
 				System.err.print("Error when adding new trusting :" + e.getMessage());
 			}
@@ -531,7 +513,6 @@ public class Order {
 				updateStatement.close();
 			if (queryStatement != null) 
 				queryStatement.close();
-			con.setAutoCommit(true);
 		}
 		return 1;
 	}
@@ -555,7 +536,6 @@ public class Order {
 					"    GROUP BY r.uid0) AS fb " + 
 					"ORDER BY fb.rating DESC LIMIT ? ";
 
-				con.setAutoCommit(false);
 
 				queryStatement = con.prepareStatement(queryString);
 				queryStatement.setString(1, isbn);
@@ -570,7 +550,6 @@ public class Order {
 					String comment = res.getString("comment");
 					System.out.println(String.format(" %7.3f %10s %7d %s", rating, username, score, comment));
 				}
-				con.commit();
 			} catch (SQLException e ) {
 				System.err.print("Error when querying trending feedbacks :" + e.getMessage());
 			}
@@ -579,7 +558,6 @@ public class Order {
 		} finally {
 			if (queryStatement != null) 
 				queryStatement.close();
-			con.setAutoCommit(true);
 		}
 		return 1;
 	}
@@ -606,7 +584,6 @@ public class Order {
 					"GROUP BY o2.bid "+
 					"ORDER BY commonSales DESC ";
 
-				con.setAutoCommit(false);
 
 				queryStatement = con.prepareStatement(queryString);
 				queryStatement.setString(1, isbn);
@@ -619,7 +596,6 @@ public class Order {
 					int sales = res.getInt("commonSales"); 
 					System.out.println(String.format(" %10s %7s", isbns, sales));
 				}
-				con.commit();
 			} catch (SQLException e ) {
 				System.err.print("Error when querying suggested books :" + e.getMessage());
 			}
@@ -628,7 +604,6 @@ public class Order {
 		} finally {
 			if (queryStatement != null) 
 				queryStatement.close();
-			con.setAutoCommit(true);
 		}
 		return 1;
 	}
@@ -657,7 +632,6 @@ public class Order {
 					"LEFT JOIN (     SELECT * FROM Trust WHERE Trust.trust=0 ) as TT ON User.uid=TT.uid0 " +
 				   	"GROUP BY User.uid ) as tmp2  WHERE tmp1.uid=tmp2.uid and tmp1.uid != ? ORDER BY score DESC LIMIT ?";
 
-				con.setAutoCommit(false);
 
 				queryStatement = con.prepareStatement(queryString);
 				queryStatement.setInt(1, uid);
@@ -691,7 +665,6 @@ public class Order {
 					System.out.println(String.format(" %14s %14.3f", username, score));
 				}
 	
-				con.commit();
 			} catch (SQLException e ) {
 				System.err.print("Error when querying awarding users :" + e.getMessage());
 			}
@@ -700,7 +673,6 @@ public class Order {
 		} finally {
 			if (queryStatement != null) 
 				queryStatement.close();
-			con.setAutoCommit(true);
 		}
 		return 1;
 	}
