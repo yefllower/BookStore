@@ -540,6 +540,57 @@ public class Order {
 		return 1;
 	}
 
+	public int award(int userPower, int uid)
+		throws Exception {
+		System.out.println("Cmd is award");
+		
+		if (userPower != 2) {
+			System.out.println("Unauthorized, only manager can access list of awarding users");
+			return -1;
+		}
+
+		PreparedStatement queryStatement = null;
+
+		try {
+			int number = Integer.parseInt(nextString("Enter the number of showing users:", false));
+
+			try {
+				String queryString =
+					"SELECT tmp1.username, tmp1.num1-tmp2.num2 as score " +
+					"FROM ( SELECT User.uid, User.username, count(TT.uid1) as num1 FROM User " + 
+					"LEFT JOIN (     SELECT * FROM Trust WHERE Trust.trust=1 ) as TT ON User.uid=TT.uid0 " +  
+					"GROUP BY User.uid ) as tmp1, ( " +
+					"SELECT User.uid, count(TT.uid1) as num2 FROM User " + 
+					"LEFT JOIN (     SELECT * FROM Trust WHERE Trust.trust=0 ) as TT ON User.uid=TT.uid0 " +
+				   	"GROUP BY User.uid ) as tmp2  WHERE tmp1.uid=tmp2.uid and tmp1.uid != ? ORDER BY score DESC LIMIT ?";
+
+				con.setAutoCommit(false);
+
+				queryStatement = con.prepareStatement(queryString);
+				queryStatement.setInt(1, uid);
+				queryStatement.setInt(2, number);
+				ResultSet res = queryStatement.executeQuery();
+				System.out.println("Query of awarding users returned");
+				System.out.println(String.format(" %10s %7s", "username", "score"));
+				while (res.next()) {
+					String username = res.getString("username"); 
+					int score = res.getInt("score"); 
+					System.out.println(String.format(" %10s %7s", username, score));
+				}
+				con.commit();
+			} catch (SQLException e ) {
+				System.err.print("Error when querying awarding users :" + e.getMessage());
+			}
+		} catch (Exception e ) {
+			System.out.println("Errors in input");
+		} finally {
+			if (queryStatement != null) 
+				queryStatement.close();
+			con.setAutoCommit(true);
+		}
+		return 1;
+	}
+
 
 	private String next(Boolean acceptEmpty) throws Exception {
 		String s;
