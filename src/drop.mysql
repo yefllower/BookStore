@@ -4,5 +4,7 @@ DROP TABLE Feedback;
 DROP TABLE Trust;
 DROP TABLE Ordering;
 DROP TABLE User;
+DROP TABLE Written;
+DROP TABLE Author;
 DROP TABLE Book;
 DROP TABLE Publisher;

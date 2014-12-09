@@ -196,6 +196,7 @@ public class Order {
 		try {
 			String isbn = nextString("Enter book's isbn :", false);
 			String title = nextString("Enter book's title :", false);
+			String authorString = nextString("Enter book's authors(seperated with ','):", false);
 			String publisher = nextString("Enter book's publisher name :", false);
 			int year = Integer.parseInt(nextString("Enter book's year :", false));
 			int stock = Integer.parseInt(nextString("Enter book's number of copies :", false));
@@ -213,6 +214,23 @@ public class Order {
 				String queryString = 
 					"SELECT pid FROM Publisher " + 
 					"WHERE name = ?";
+
+				String[] authors = authorString.split(",");
+				for (int i = 0; i < authors.length; i++) {
+					int aid = -1;
+					queryStatement = con.prepareStatement("SELECT aid FROM Author WHERE name=?");
+					queryStatement.setString(1, authors[i].trim());
+					ResultSet tmp = queryStatement.executeQuery();
+					while (tmp.next()) {
+						aid = tmp.getInt("aid");
+					}
+					if (aid == -1) {
+						System.out.println("Unknown author, added");
+						updateStatement = con.prepareStatement("INSERT INTO Author (name) VALUES (?)");
+						updateStatement.setString(1, authors[i].trim());
+						updateStatement.executeUpdate();
+					}
+				}
 
 				con.setAutoCommit(false);
 
@@ -244,6 +262,28 @@ public class Order {
 				updateStatement.setString(8, subject);
 				updateStatement.executeUpdate();
 				System.out.println("New book added");
+
+				int bid = -1;
+				queryStatement = con.prepareStatement("SELECT bid FROM Book WHERE isbn = ?");
+				queryStatement.setString(1, isbn);
+				res = queryStatement.executeQuery();
+				while (res.next())
+					bid = res.getInt("bid");
+
+				for (int i = 0; i < authors.length; i++) {
+					int aid = -1;
+					queryStatement = con.prepareStatement("SELECT aid FROM Author WHERE name=?");
+					queryStatement.setString(1, authors[i].trim());
+					ResultSet tmp = queryStatement.executeQuery();
+					while (tmp.next()) {
+						aid = tmp.getInt("aid");
+					}
+					updateStatement = con.prepareStatement("INSERT INTO Written (aid, bid) VALUES (?, ?)");
+					updateStatement.setInt(1, aid);
+					updateStatement.setInt(2, bid);
+					updateStatement.executeUpdate();
+				}
+
 				con.commit();
 			} catch (SQLException e ) {
 				System.err.print("Error when adding new book:" + e.getMessage());

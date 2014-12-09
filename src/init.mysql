@@ -36,6 +36,25 @@ CREATE TABLE Book (
     CHECK (price >= 0)
 );
 
+CREATE TABLE Author (
+    aid       INT AUTO_INCREMENT,
+	name      VARCHAR(256) NOT NULL,
+	PRIMARY KEY (aid),
+	UNIQUE (name)
+);
+
+CREATE TABLE Written (
+    aid       INT,
+	bid       INT,
+    PRIMARY KEY (aid, bid),
+    FOREIGN KEY (aid) REFERENCES Author (aid)
+        ON UPDATE CASCADE
+        ON DELETE CASCADE,
+    FOREIGN KEY (bid) REFERENCES Book (bid)
+        ON UPDATE CASCADE
+        ON DELETE CASCADE
+);
+
 CREATE TABLE Feedback (
     bid      INT,
     uid      INT,
