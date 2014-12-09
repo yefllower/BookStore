@@ -570,13 +570,34 @@ public class Order {
 				queryStatement.setInt(1, uid);
 				queryStatement.setInt(2, number);
 				ResultSet res = queryStatement.executeQuery();
-				System.out.println("Query of awarding users returned");
-				System.out.println(String.format(" %10s %7s", "username", "score"));
+				System.out.println("Query of awarding trusted users returned");
+				System.out.println(String.format(" %14s %14s", "username", "trust score"));
 				while (res.next()) {
 					String username = res.getString("username"); 
 					int score = res.getInt("score"); 
-					System.out.println(String.format(" %10s %7s", username, score));
+					System.out.println(String.format(" %14s %14d", username, score));
 				}
+				
+				queryString =
+					"SELECT fb.username, AVG(fb.rating) as score FROM ( " +
+					"    SELECT AVG(r.score) as rating, u.username, u.uid " +
+					"    FROM Rating r, Feedback f, User u " + 
+					"    WHERE r.bid=f.bid and r.uid0=f.uid and u.uid != ? and u.uid=f.uid " + 
+					"    GROUP BY r.uid0) AS fb " + 
+					"GROUP BY fb.uid ORDER BY fb.rating DESC LIMIT ? ";
+
+				queryStatement = con.prepareStatement(queryString);
+				queryStatement.setInt(1, uid);
+				queryStatement.setInt(2, number);
+				res = queryStatement.executeQuery();
+				System.out.println("Query of awarding useful users returned");
+				System.out.println(String.format(" %14s %14s", "username", "useful score"));
+				while (res.next()) {
+					String username = res.getString("username"); 
+					double score = res.getFloat("score"); 
+					System.out.println(String.format(" %14s %14.3f", username, score));
+				}
+	
 				con.commit();
 			} catch (SQLException e ) {
 				System.err.print("Error when querying awarding users :" + e.getMessage());
