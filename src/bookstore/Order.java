@@ -108,6 +108,80 @@ public class Order {
 		return uid * 10 + userPower;
 	}
 
+	public double neworder(int userPower, int uid)
+		throws Exception {
+		System.out.println("Cmd is neworder");
+		if (userPower == 0) {
+			System.out.println("Unauthorized, only logined user can make ordering");
+			return -1.0;
+		}
+
+		PreparedStatement updateStatement = null;
+		PreparedStatement queryStatement = null;
+		double sumPrice = 0;
+
+		try {
+			String isbn = nextString("Enter book's isbn :", false);
+			String numberString = nextString("Enter number of buying copies (1 by default):", true);
+			int number = 1;
+			if (numberString.length() > 0) number = Integer.parseInt(numberString);
+			long timstamp = System.currentTimeMillis();
+
+			try {
+				String updateString =
+					"INSERT INTO Ordering " + 
+					"(bid, uid, number, dates) VALUES " +
+					"(?, ?, ?, ?)";
+
+				con.setAutoCommit(false);
+
+				queryStatement = con.prepareStatement("SELECT bid, price, stock FROM Book WHERE isbn = ?");
+				queryStatement.setString(1, isbn);
+				double price = -1;
+				int stock = -1;
+				int bid = -1;
+				ResultSet res = queryStatement.executeQuery();
+				while (res.next()) {
+					bid = res.getInt("bid");
+					price = res.getFloat("price");
+					stock = res.getInt("stock");
+				}
+				if (price < 0 || stock < number || bid < 0) {
+					System.out.println("Unknown book or unsuffient number of stock");
+					return -1;
+				}
+
+				updateStatement = con.prepareStatement(updateString);
+				updateStatement.setInt(1, bid);
+				updateStatement.setInt(2, uid);
+				updateStatement.setInt(3, number);
+				updateStatement.setTimestamp(4, new Timestamp(timstamp));
+				updateStatement.executeUpdate();
+				sumPrice = price * number;
+				System.out.println("New ordering added " + String.format("%.2f", sumPrice));
+
+				updateStatement = con.prepareStatement("UPDATE Book SET stock=stock-? WHERE isbn=?");
+				updateStatement.setInt(1, number);
+				updateStatement.setString(2, isbn);
+				updateStatement.executeUpdate();
+				System.out.println("Book stock info updated ");
+
+				con.commit();
+			} catch (SQLException e ) {
+				System.err.print("Error when adding new book:" + e.getMessage());
+			}
+		} catch (Exception e ) {
+			System.out.println("Errors in input");
+		} finally {
+			if (updateStatement != null) 
+				updateStatement.close();
+			if (queryStatement != null) 
+				queryStatement.close();
+			con.setAutoCommit(true);
+		}
+		return sumPrice;
+	}
+
 	public int newbook(int userPower)
 		throws Exception {
 		System.out.println("Cmd is newbook");

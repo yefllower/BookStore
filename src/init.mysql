@@ -80,3 +80,19 @@ CREATE TABLE Trust (
         ON UPDATE CASCADE
         ON DELETE CASCADE
 );
+
+CREATE TABLE Ordering (
+    oid      INT AUTO_INCREMENT,
+	bid      INT NOT NULL,
+	uid      INT NOT NULL,
+	number   INT NOT NULL,
+	dates    TIMESTAMP,
+    PRIMARY KEY (oid),
+	CHECK (number >= 1),
+    FOREIGN KEY (bid) REFERENCES Book (bid)
+        ON UPDATE CASCADE
+        ON DELETE CASCADE,
+    FOREIGN KEY (uid) REFERENCES User (uid)
+        ON UPDATE CASCADE
+        ON DELETE CASCADE
+);

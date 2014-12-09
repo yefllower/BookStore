@@ -15,7 +15,7 @@ public class UserInterface {
 		"  0. exit                " + "\n" + 
 		"  1. register            " + "\n" + 
 		"  2. login               " + "\n" + 
-		"  3. exit                " + "\n" + 
+		"  3. order               " + "\n" + 
 		"  4. newbook             " + "\n" + 
 		"  5. newcopy             " + "\n" + 
 		"  6. feedback            " + "\n" + 
@@ -62,6 +62,7 @@ public class UserInterface {
 				userPower = res % 10;
 				uid = res / 10;
 			} else if (cmd.equals("3") || cmd.equals("order")) {
+				double ress = order.neworder(userPower, uid);
 			} else if (cmd.equals("4") || cmd.equals("newbook")) {
 				res = order.newbook(userPower);
 			} else if (cmd.equals("5") || cmd.equals("newcopy")) {
