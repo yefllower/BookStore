@@ -14,8 +14,12 @@ You can try
 make run < test.in
 ```
 
-init.mysql and drop.mysql are create sentences and drop tables.
+init.mysql and drop.mysql are CREATE sentences and DROP sentences.
 They are used to install and uninstall the database. 
+
+
+ER.png is the ER diagram of this database.
+
 
 Usages
 =========
