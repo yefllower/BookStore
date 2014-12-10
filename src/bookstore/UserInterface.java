@@ -25,7 +25,7 @@ public class UserInterface {
 		" 10. useful              " + "\n" + 
 		" 11. suggest             " + "\n" + 
 		" 12. exit                " + "\n" + 
-		" 13. exit                " + "\n" + 
+		" 13. statistics          " + "\n" + 
 		" 14. award               " + "\n" + 
 		"  Have fun!";
 	
@@ -81,7 +81,8 @@ public class UserInterface {
 			} else if (cmd.equals("11") || cmd.equals("suggest")) {
 				res = order.suggest(userPower, uid);
 			} else if (cmd.equals("12") || cmd.equals("seperate")) {
-			} else if (cmd.equals("13") || cmd.equals("statics")) {
+			} else if (cmd.equals("13") || cmd.equals("statistcs")) {
+				res = order.statistics(userPower, uid);
 			} else if (cmd.equals("14") || cmd.equals("award")) {
 				res = order.award(userPower, uid);
 			} else {

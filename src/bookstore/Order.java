@@ -546,7 +546,7 @@ public class Order {
 				"    Author.name LIKE ? and Publisher.name LIKE ? and " +
 				"	Book.subject LIKE ? and Book.title LIKE ? " ;
 			if (listType.equals("3") || listType.equals("trusted")) 
-				queryString = queryString + "and Trust.uid0 = Feedback.uid and Trust.uid1 = ? ";
+				queryString = queryString + "and Trust.uid0 = Feedback.uid and Trust.uid1 = ? and Trust.trust = 1 ";
 			
 			queryString = queryString +	"GROUP BY Book.bid, Author.name ";
 
@@ -574,7 +574,7 @@ public class Order {
 			
 			try {
 				ResultSet res = queryStatement.executeQuery();
-				System.out.println("Query of trending feedbacks returned");
+				System.out.println("Query of browsing books returned");
 				System.out.println(String.format(" %13s %30s %10s %7s   %s", "isbn", "title", "publisher", "score", "author"));
 				double score = 0;
 				String isbn = "-1", title = "", publisher = "", author = "";
@@ -600,7 +600,7 @@ public class Order {
 					System.out.println(String.format(" %13s %30s %10s %7.3f   %s", isbn, title, publisher, score, author));
 				}
 			} catch (SQLException e ) {
-				System.err.print("Error when querying trending feedbacks :" + e.getMessage());
+				System.err.print("Error when browsing books :" + e.getMessage());
 			}
 		} catch (Exception e ) {
 			System.out.println("Errors in input");
@@ -702,10 +702,93 @@ public class Order {
 		return 1;
 	}
 
+	public int statistics(int userPower, int uid)
+		throws Exception {
+		System.out.println("Cmd is statistics");
+		
+		if (userPower != 2) {
+			System.out.println("Unauthorized, only manager can access statistics ");
+			return -1;
+		}
+
+		PreparedStatement queryStatement = null;
+
+		try {
+			int number = Integer.parseInt(nextString("Enter the number of showing users:", false));
+
+			try {
+				String queryString =
+					"SELECT Book.isbn, Book.title, SUM(Ordering.number) as sales "+
+					"FROM Book left join Ordering on Book.bid=Ordering.bid "+
+					"GROUP BY Book.bid "+
+					"ORDER BY sales DESC LIMIT ?";
+
+				queryStatement = con.prepareStatement(queryString);
+				queryStatement.setInt(1, number);
+				ResultSet res = queryStatement.executeQuery();
+				System.out.println("\nQuery of popular books returned");
+				System.out.println(String.format(" %20s %30s %7s", "isbn", "title", "sales"));
+				while (res.next()) {
+					String isbn = res.getString("isbn"); 
+					String title = res.getString("title"); 
+					int sales = res.getInt("sales"); 
+					System.out.println(String.format(" %20s %30s %7d", isbn, title, sales));
+				}
+				
+				queryString =
+					"SELECT Author.name, SUM(Ordering.number) as sales "+
+					"FROM ((Book left join Ordering on Book.bid=Ordering.bid)  "+
+					"	left join Written on Written.bid=Book.bid), "+
+					"	Author "+
+					"WHERE Author.aid=Written.aid "+
+					"GROUP BY Author.aid "+
+					"ORDER BY sales DESC LIMIT ?";
+
+				queryStatement = con.prepareStatement(queryString);
+				queryStatement.setInt(1, number);
+				res = queryStatement.executeQuery();
+				System.out.println("\nQuery of popular authors returned");
+				System.out.println(String.format(" %20s %7s", "name", "sales"));
+				while (res.next()) {
+					String name = res.getString("name"); 
+					int sales = res.getInt("sales"); 
+					System.out.println(String.format(" %20s %7d", name, sales));
+				}
+
+				queryString =
+					"SELECT Publisher.name, SUM(Ordering.number) as sales "+
+					"FROM (Book left join Ordering on Book.bid=Ordering.bid) "+
+					"	left join Publisher on Publisher.pid=Book.publisher "+
+					"GROUP BY Publisher.pid "+
+					"ORDER BY sales DESC LIMIT ?";
+
+				queryStatement = con.prepareStatement(queryString);
+				queryStatement.setInt(1, number);
+				res = queryStatement.executeQuery();
+				System.out.println("\nQuery of popular publishers returned");
+				System.out.println(String.format(" %20s %7s", "name", "sales"));
+				while (res.next()) {
+					String name = res.getString("name"); 
+					int sales = res.getInt("sales"); 
+					System.out.println(String.format(" %20s %7d", name, sales));
+				}
+
+			} catch (SQLException e ) {
+				System.err.print("Error when querying statistics :" + e.getMessage());
+			}
+		} catch (Exception e ) {
+			System.out.println("Errors in input");
+		} finally {
+			if (queryStatement != null) 
+				queryStatement.close();
+		}
+		return 1;
+	}
+
 	public int award(int userPower, int uid)
 		throws Exception {
 		System.out.println("Cmd is award");
-		
+
 		if (userPower != 2) {
 			System.out.println("Unauthorized, only manager can access list of awarding users");
 			return -1;
@@ -724,7 +807,7 @@ public class Order {
 					"GROUP BY User.uid ) as tmp1, ( " +
 					"SELECT User.uid, count(TT.uid1) as num2 FROM User " + 
 					"LEFT JOIN (     SELECT * FROM Trust WHERE Trust.trust=0 ) as TT ON User.uid=TT.uid0 " +
-				   	"GROUP BY User.uid ) as tmp2  WHERE tmp1.uid=tmp2.uid and tmp1.uid != ? ORDER BY score DESC LIMIT ?";
+					"GROUP BY User.uid ) as tmp2  WHERE tmp1.uid=tmp2.uid and tmp1.uid != ? ORDER BY score DESC LIMIT ?";
 
 
 				queryStatement = con.prepareStatement(queryString);
@@ -738,7 +821,7 @@ public class Order {
 					int score = res.getInt("score"); 
 					System.out.println(String.format(" %14s %14d", username, score));
 				}
-				
+
 				queryString =
 					"SELECT fb.username, AVG(fb.rating) as score FROM ( " +
 					"    SELECT AVG(r.score) as rating, u.username, u.uid " +
@@ -758,7 +841,7 @@ public class Order {
 					double score = res.getFloat("score"); 
 					System.out.println(String.format(" %14s %14.3f", username, score));
 				}
-	
+
 			} catch (SQLException e ) {
 				System.err.print("Error when querying awarding users :" + e.getMessage());
 			}
