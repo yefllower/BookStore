@@ -52,6 +52,7 @@ public class UserInterface {
 				continue;
 
 			if (cmd.equals("0") || cmd.equals("exit")) {
+				System.out.println("Bye");
 				break;
 			} else if (cmd.equals("1") || cmd.equals("register")) {
 				res = order.register();
