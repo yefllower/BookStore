@@ -17,7 +17,7 @@ using namespace std;
 
 #define REP(i, n) for(int i(0); (i)<(int)(n); i++)
 
-int n = 3 + 1;
+int n = 3 + 1, m = 10 + 1;
 const int N = 40, M = 20;
 
 char authors[N][M] = {
@@ -85,7 +85,7 @@ int main() {
 	cout << endl;
 	cout << "login" << endl << "root" << endl << "123" << endl;
 	vector<string> bis;
-	REP(i, n) if (i) {
+	REP(i, m) if (i) {
 		string iss = genNumString(13);
 		bis.push_back(iss);
 		cout << "newbook" << endl << iss << endl << genTitle() << endl;
@@ -108,7 +108,7 @@ int main() {
 	cout << endl;
 	REP(i, n) if (i) {
 		cout << "login" << endl << user[i].first << endl << user[i].second << endl;
-		REP(j, n) if (j) {
+		REP(j, m) if (j) {
 			cout << "feedback" << endl << bis[j - 1] << endl << (rand()%11) << endl << endl;
 		}
 	}
@@ -117,7 +117,7 @@ int main() {
 	REP(i, n) if (i) {
 		cout << "login" << endl << user[i].first << endl << user[i].second << endl;
 		REP(j, n) if (j && j != i) {
-			REP(k, n) if (k) {
+			REP(k, m) if (k) {
 				cout << "rate" << endl << user[j].first << endl << bis[k - 1] << endl << (rand() % 3) << endl;
 			}
 		}
@@ -126,11 +126,12 @@ int main() {
 
 	REP(i, n) if (i) {
 		cout << "login" << endl << user[i].first << endl << user[i].second << endl;
-		REP(j, n) if (j) {
+		REP(j, m) if (j) {
 			cout << "order" << endl << bis[j - 1] << endl << (rand() % 2 + 1) << endl;
 		}
 	}
 	cout << endl;
+
 	cout << 0 << endl;
 	return 0;
 }

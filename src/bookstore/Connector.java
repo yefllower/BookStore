@@ -7,12 +7,12 @@ public class Connector {
 	public Connector() throws Exception {
 		System.out.println("Connecting the specified database...");
 		try{
-			String userName = "root";
-			String password = "123111";
-			String url = "jdbc:mysql://localhost/testbase";
-//			String userName = "acmdbu01";
-//			String password = "sgvt3uf1";
-//			String url = "jdbc:mysql://georgia.eng.utah.edu/acmdb01";
+//			String userName = "root";
+//			String password = "123111";
+//			String url = "jdbc:mysql://localhost/testbase";
+			String userName = "acmdbu19";
+			String password = "r24qlf9n";
+			String url = "jdbc:mysql://georgia.eng.utah.edu/acmdb19";
 			Class.forName ("com.mysql.jdbc.Driver").newInstance ();
 			con = DriverManager.getConnection (url, userName, password);
 			System.out.println("Database connected...");
