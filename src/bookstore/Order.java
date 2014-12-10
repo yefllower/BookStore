@@ -517,6 +517,100 @@ public class Order {
 		return 1;
 	}
 
+	public int browse(int userPower, int uid)
+		throws Exception {
+		System.out.println("Cmd is browse");
+
+		PreparedStatement queryStatement = null;
+
+		try {
+
+			String titleKey = nextString("Enter key word in title (empty by default):", true);
+			String publisherKey = nextString("Enter key word in publisher (empty by default):", true);
+			String authorKey = nextString("Enter key word in author (empty by default):", true);
+			String subjectKey = nextString("Enter key word in subject (empty by default):", true);
+			String listType = nextString("Enter the browsing order (1.year, 2.feedback, 3.trusted):", true);
+			String orderType = nextString("Enter INC(increasing) or DESC(descending) (descending by default):", true);
+			if (orderType.length() == 0) orderType = "DESC";
+			
+			if (listType.equals("3") || listType.equals("trusted")) 
+			if (userPower == 0) {
+				System.out.println("Unauthorized, only logined user have trusted option");
+				return -1;
+			}
+			String queryString = 
+				"SELECT Book.isbn, Book.title, Publisher.name as publisher, Author.name as author, AVG(Feedback.score) as score " +
+				"FROM Book, Written, Author, Publisher, Feedback, Trust " +
+				"WHERE Book.bid = Written.bid and Written.aid = Author.aid and " +
+				"	Book.publisher = Publisher.pid and Feedback.bid = Book.bid and " +
+				"    Author.name LIKE ? and Publisher.name LIKE ? and " +
+				"	Book.subject LIKE ? and Book.title LIKE ? " ;
+			if (listType.equals("3") || listType.equals("trusted")) 
+				queryString = queryString + "and Trust.uid0 = Feedback.uid and Trust.uid1 = ? ";
+			
+			queryString = queryString +	"GROUP BY Book.bid, Author.name ";
+
+			if (listType.equals("1") || listType.equals("year")) 
+				queryString = queryString + "ORDER BY Book.year" ;
+			else if (listType.equals("2") || listType.equals("feedback")) 
+				queryString = queryString + "ORDER BY score ";
+			else if (listType.equals("3") || listType.equals("trusted")) 
+				queryString = queryString + "ORDER BY score ";
+			else {
+				System.out.println("Unknown browsing order '" + listType + "'");
+				return -1;
+			}
+			if (!orderType.equals("INC"))
+				queryString = queryString + " DESC";  
+
+			queryStatement = con.prepareStatement(queryString);
+			
+			queryStatement.setString(1, "%" + authorKey + "%");
+			queryStatement.setString(2, "%" + publisherKey + "%");
+			queryStatement.setString(3, "%" + subjectKey + "%");
+			queryStatement.setString(4, "%" + titleKey + "%");
+			if (listType.equals("3") || listType.equals("trusted")) 
+				queryStatement.setInt(5, uid);
+			
+			try {
+				ResultSet res = queryStatement.executeQuery();
+				System.out.println("Query of trending feedbacks returned");
+				System.out.println(String.format(" %13s %30s %10s %7s   %s", "isbn", "title", "publisher", "score", "author"));
+				double score = 0;
+				String isbn = "-1", title = "", publisher = "", author = "";
+				Boolean first = true;
+				while (res.next()) {
+					String nisbn = res.getString("isbn");
+					if (!isbn.equals(nisbn)) {
+						if (!isbn.equals("-1"))
+							System.out.println(String.format(" %13s %30s %10s %7.3f   %s", isbn, title, publisher, score, author));
+						isbn = nisbn;
+						first = true;
+					}
+					title = res.getString("title");
+					publisher = res.getString("publisher");
+					score = res.getFloat("score");
+					String nauthor = res.getString("author");
+					if (!first)
+						author = author + ", ";
+					first = false;
+					author = author + nauthor;	   
+				}
+				if (!isbn.equals("-1")) {
+					System.out.println(String.format(" %13s %30s %10s %7.3f   %s", isbn, title, publisher, score, author));
+				}
+			} catch (SQLException e ) {
+				System.err.print("Error when querying trending feedbacks :" + e.getMessage());
+			}
+		} catch (Exception e ) {
+			System.out.println("Errors in input");
+		} finally {
+			if (queryStatement != null) 
+				queryStatement.close();
+		}
+		return 1;
+	}
+
 	public int useful(int userPower, int uid1)
 		throws Exception {
 		System.out.println("Cmd is useful");

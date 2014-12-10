@@ -21,7 +21,7 @@ public class UserInterface {
 		"  6. feedback            " + "\n" + 
 		"  7. rate                " + "\n" + 
 		"  8. trust               " + "\n" + 
-		"  9. exit                " + "\n" + 
+		"  9. browse              " + "\n" + 
 		" 10. useful              " + "\n" + 
 		" 11. suggest             " + "\n" + 
 		" 12. exit                " + "\n" + 
@@ -75,6 +75,7 @@ public class UserInterface {
 			} else if (cmd.equals("8") || cmd.equals("trust")) {
 				res = order.trust(userPower, uid);
 			} else if (cmd.equals("9") || cmd.equals("browse")) {
+				res = order.browse(userPower, uid);
 			} else if (cmd.equals("10") || cmd.equals("useful")) {
 				res = order.useful(userPower, uid);
 			} else if (cmd.equals("11") || cmd.equals("suggest")) {
