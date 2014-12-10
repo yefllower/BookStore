@@ -353,7 +353,7 @@ public class Order {
 					"INSERT INTO Feedback " + 
 					"(bid, uid, score, dates, comment) VALUES " + 
 					"(?, ?, ?, ?, ?)";
-			
+
 				String queryString = 
 					"SELECT bid FROM Book " + 
 					"WHERE isbn = ?";
@@ -413,7 +413,7 @@ public class Order {
 					"INSERT INTO Rating " + 
 					"(bid, uid0, uid1, score) VALUES " + 
 					"(?, ?, ?, ?)";
-			
+
 
 				queryStatement = con.prepareStatement("SELECT bid FROM Book WHERE isbn = ?");
 				queryStatement.setString(1, isbn);
@@ -484,12 +484,12 @@ public class Order {
 					"INSERT INTO Trust " + 
 					"(uid0, uid1, trust) VALUES " + 
 					"(?, ?, ?)";
-			
+
 
 				queryStatement = con.prepareStatement("SELECT uid FROM User WHERE username = ?");
 				queryStatement.setString(1, username);
 				int uid0 = -1;
-			 	ResultSet res = queryStatement.executeQuery();
+				ResultSet res = queryStatement.executeQuery();
 				while (res.next()) 
 					uid0 = res.getInt("uid");
 				if (uid0 == -1) {
@@ -532,12 +532,12 @@ public class Order {
 			String listType = nextString("Enter the browsing order (1.year, 2.feedback, 3.trusted):", true);
 			String orderType = nextString("Enter INC(increasing) or DESC(descending) (descending by default):", true);
 			if (orderType.length() == 0) orderType = "DESC";
-			
+
 			if (listType.equals("3") || listType.equals("trusted")) 
-			if (userPower == 0) {
-				System.out.println("Unauthorized, only logined user have trusted option");
-				return -1;
-			}
+				if (userPower == 0) {
+					System.out.println("Unauthorized, only logined user have trusted option");
+					return -1;
+				}
 			String queryString = 
 				"SELECT Book.isbn, Book.title, Publisher.name as publisher, Author.name as author, AVG(Feedback.score) as score " +
 				"FROM Book, Written, Author, Publisher, Feedback, Trust " +
@@ -547,7 +547,7 @@ public class Order {
 				"	Book.subject LIKE ? and Book.title LIKE ? " ;
 			if (listType.equals("3") || listType.equals("trusted")) 
 				queryString = queryString + "and Trust.uid0 = Feedback.uid and Trust.uid1 = ? and Trust.trust = 1 ";
-			
+
 			queryString = queryString +	"GROUP BY Book.bid, Author.name ";
 
 			if (listType.equals("1") || listType.equals("year")) 
@@ -564,14 +564,14 @@ public class Order {
 				queryString = queryString + " DESC";  
 
 			queryStatement = con.prepareStatement(queryString);
-			
+
 			queryStatement.setString(1, "%" + authorKey + "%");
 			queryStatement.setString(2, "%" + publisherKey + "%");
 			queryStatement.setString(3, "%" + subjectKey + "%");
 			queryStatement.setString(4, "%" + titleKey + "%");
 			if (listType.equals("3") || listType.equals("trusted")) 
 				queryStatement.setInt(5, uid);
-			
+
 			try {
 				ResultSet res = queryStatement.executeQuery();
 				System.out.println("Query of browsing books returned");
@@ -655,11 +655,11 @@ public class Order {
 		}
 		return 1;
 	}
-	
+
 	public int suggest(int userPower, int uid)
 		throws Exception {
 		System.out.println("Cmd is suggest");
-		
+
 		if (userPower == 0) {
 			System.out.println("Unauthorized, only logined user can get suggestion");
 			return -1;
@@ -702,10 +702,69 @@ public class Order {
 		return 1;
 	}
 
+	public int seperate(int userPower, int uid)
+		throws Exception {
+		System.out.println("Cmd is statistics");
+
+		PreparedStatement queryStatement = null;
+
+		try {
+			String name1 = nextString("Enter the first author's full name :", false);
+			String name2 = nextString("Enter the second author's full name :", false);
+
+			try {
+				String queryString =
+					"SELECT * FROM Book, Author a1, Author a2, Written w1, Written w2 "+
+					"WHERE Book.bid = w1.bid and Book.bid = w2.bid and w1.aid = a1.aid "+
+					"and w2.aid = a2.aid and a1.name=? and a2.name=? ";
+
+				queryStatement = con.prepareStatement(queryString);
+				queryStatement.setString(1, name1);
+				queryStatement.setString(2, name2);
+				ResultSet res = queryStatement.executeQuery();
+				int bid = -1;
+				while (res.next()) {
+					bid = res.getInt("bid");
+				}
+				if (bid != -1) {
+					System.out.println("They are one-degree seperated");
+					return 0;
+				}
+
+				queryString =
+					"SELECT * FROM Book, Author a1, Author a2, Written w1, Written w2 "+
+					"WHERE Book.bid = w1.bid and Book.bid = w2.bid and w1.aid = a1.aid "+
+					"and w2.aid = a2.aid and a1.name=? and a2.name=? ";
+
+				queryStatement = con.prepareStatement(queryString);
+				queryStatement.setString(1, name1);
+				queryStatement.setString(2, name2);
+				res = queryStatement.executeQuery();
+				int aid = -1;
+				while (res.next()) {
+					aid = res.getInt("a2d");
+				}
+				if (aid != -1) {
+					System.out.println("They are two-degree seperated");
+					return 0;
+				}
+				System.out.println("They are seperated too far");
+			} catch (SQLException e ) {
+				System.err.print("Error when querying statistics :" + e.getMessage());
+			}
+		} catch (Exception e ) {
+			System.out.println("Errors in input");
+		} finally {
+			if (queryStatement != null) 
+				queryStatement.close();
+		}
+		return 1;
+	}
+
 	public int statistics(int userPower, int uid)
 		throws Exception {
 		System.out.println("Cmd is statistics");
-		
+
 		if (userPower != 2) {
 			System.out.println("Unauthorized, only manager can access statistics ");
 			return -1;
@@ -734,7 +793,7 @@ public class Order {
 					int sales = res.getInt("sales"); 
 					System.out.println(String.format(" %20s %30s %7d", isbn, title, sales));
 				}
-				
+
 				queryString =
 					"SELECT Author.name, SUM(Ordering.number) as sales "+
 					"FROM ((Book left join Ordering on Book.bid=Ordering.bid)  "+
