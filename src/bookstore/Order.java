@@ -538,52 +538,75 @@ public class Order {
 					System.out.println("Unauthorized, only logined user have trusted option");
 					return -1;
 				}
-			String queryString = 
-				"SELECT Book.isbn, Book.title, Publisher.name as publisher, Author.name as author, AVG(Feedback.score) as score " +
-				"FROM Book, Written, Author, Publisher, Feedback, Trust " +
-				"WHERE Book.bid = Written.bid and Written.aid = Author.aid and " +
-				"	Book.publisher = Publisher.pid and Feedback.bid = Book.bid and " +
-				"    Author.name LIKE ? and Publisher.name LIKE ? and " +
-				"	Book.subject LIKE ? and Book.title LIKE ? " ;
-			if (listType.equals("3") || listType.equals("trusted")) 
-				queryString = queryString + "and Trust.uid0 = Feedback.uid and Trust.uid1 = ? and Trust.trust = 1 ";
-
-			queryString = queryString +	"GROUP BY Book.bid, Author.name ";
-
-			if (listType.equals("1") || listType.equals("year")) 
-				queryString = queryString + "ORDER BY Book.year" ;
-			else if (listType.equals("2") || listType.equals("feedback")) 
-				queryString = queryString + "ORDER BY score ";
-			else if (listType.equals("3") || listType.equals("trusted")) 
-				queryString = queryString + "ORDER BY score ";
-			else {
-				System.out.println("Unknown browsing order '" + listType + "'");
-				return -1;
+			int o = 0;
+			String queryString = "";
+			String xxx = "score";
+			if (listType.equals("1") || listType.equals("year")) {
+				xxx = "year";
+				queryString = 
+					"SELECT Book.bid, Book.isbn, Book.title, Publisher.name as publisher, Author.name as author, Book.year as score "+
+					"FROM Book, Publisher, Written, Author "+
+					"WHERE Publisher.pid=Book.publisher and Written.bid = Book.bid and Author.aid = Written.aid and "+
+					"Book.subject LIKE ? and Book.title LIKE ? and "+
+					"Author.name LIKE ? and Publisher.name LIKE ? "+
+					"GROUP BY Book.bid, author "+
+					"ORDER BY Book.year ";
+			} else if (listType.equals("2") || listType.equals("feedback")) {
+				queryString = 
+					"SELECT Book.bid, Book.isbn, Book.title, Publisher.name as publisher, Author.name as author, IFNULL(AVG(FT.score), 0) as score "+
+					"FROM Book left join  "+
+					"(SELECT * FROM Feedback) as FT "+
+					"on FT.bid=Book.bid, Publisher, Written, Author "+
+					"WHERE Publisher.pid=Book.publisher and Written.bid = Book.bid and Author.aid = Written.aid and "+
+					"Book.subject LIKE ? and Book.title LIKE ? and "+
+					"Author.name LIKE ? and Publisher.name LIKE ? "+
+					"GROUP BY Book.bid, author "+
+					"ORDER BY score ";
+	
+			} else if (listType.equals("3") || listType.equals("trusted")) {
+				o = 1;
+				queryString = 
+					"SELECT Book.bid, Book.isbn, Book.title, Publisher.name as publisher, Author.name as author, IFNULL(AVG(FT.score), 0) as score "+
+					"FROM Book left join  "+
+					"(SELECT * FROM Feedback, Trust WHERE Trust.uid0=Feedback.uid and Trust.uid1=? and Trust.trust=1) as FT "+
+					"on FT.bid=Book.bid, Publisher, Written, Author "+
+					"WHERE Publisher.pid=Book.publisher and Written.bid = Book.bid and Author.aid = Written.aid and "+
+					"Book.subject LIKE ? and Book.title LIKE ? and "+
+					"Author.name LIKE ? and Publisher.name LIKE ? "+
+					"GROUP BY Book.bid, author "+
+					"ORDER BY score ";
 			}
 			if (!orderType.equals("INC"))
 				queryString = queryString + " DESC";  
+			queryString = queryString + ",Book.bid";
 
 			queryStatement = con.prepareStatement(queryString);
 
-			queryStatement.setString(1, "%" + authorKey + "%");
-			queryStatement.setString(2, "%" + publisherKey + "%");
-			queryStatement.setString(3, "%" + subjectKey + "%");
-			queryStatement.setString(4, "%" + titleKey + "%");
-			if (listType.equals("3") || listType.equals("trusted")) 
-				queryStatement.setInt(5, uid);
+			queryStatement.setString(o + 1, "%" + authorKey + "%");
+			queryStatement.setString(o + 2, "%" + publisherKey + "%");
+			queryStatement.setString(o + 3, "%" + subjectKey + "%");
+			queryStatement.setString(o + 4, "%" + titleKey + "%");
+			if (listType.equals("3") || listType.equals("trusted")) {
+				queryStatement.setInt(1, uid);
+			}
 
 			try {
 				ResultSet res = queryStatement.executeQuery();
 				System.out.println("Query of browsing books returned");
-				System.out.println(String.format(" %13s %30s %10s %7s   %s", "isbn", "title", "publisher", "score", "author"));
+				System.out.println(String.format(" %13s %30s %10s %7s   %s", "isbn", "title", "publisher", xxx, "author"));
 				double score = 0;
 				String isbn = "-1", title = "", publisher = "", author = "";
 				Boolean first = true;
 				while (res.next()) {
 					String nisbn = res.getString("isbn");
 					if (!isbn.equals(nisbn)) {
-						if (!isbn.equals("-1"))
-							System.out.println(String.format(" %13s %30s %10s %7.3f   %s", isbn, title, publisher, score, author));
+						if (!isbn.equals("-1")) {
+							if (xxx.equals("year"))
+								System.out.println(String.format(" %13s %30s %10s %7.0f   %s", isbn, title, publisher, score, author));
+							else
+								System.out.println(String.format(" %13s %30s %10s %7.3f   %s", isbn, title, publisher, score, author));
+						}
+						author = "";
 						isbn = nisbn;
 						first = true;
 					}
@@ -597,13 +620,16 @@ public class Order {
 					author = author + nauthor;	   
 				}
 				if (!isbn.equals("-1")) {
-					System.out.println(String.format(" %13s %30s %10s %7.3f   %s", isbn, title, publisher, score, author));
+					if (xxx.equals("year"))
+						System.out.println(String.format(" %13s %30s %10s %7.0f   %s", isbn, title, publisher, score, author));
+					else
+						System.out.println(String.format(" %13s %30s %10s %7.3f   %s", isbn, title, publisher, score, author));
 				}
 			} catch (SQLException e ) {
 				System.err.print("Error when browsing books :" + e.getMessage());
 			}
 		} catch (Exception e ) {
-			System.out.println("Errors in input");
+			System.out.println("Errors in input" + e.getMessage());
 		} finally {
 			if (queryStatement != null) 
 				queryStatement.close();
