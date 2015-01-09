@@ -1,0 +1,141 @@
+SELECT *
+FROM (
+	SELECT AVG(r.score) as rating, f.uid, f.bid, f.score, f.comment
+	FROM Rating r, Feedback f, Book b
+	WHERE r.bid=f.bid and r.uid0=f.uid and f.bid=b.bid and b.isbn='001'
+	GROUP BY r.uid0
+) AS fb
+ORDER BY fb.rating DESC
+LIMIT 5
+;
+
+SELECT tmp1.uid, tmp1.num1-tmp2.num2 as score
+FROM (
+	SELECT User.uid, User.username, count(TT.uid1) as num1
+	FROM User LEFT JOIN (
+	    SELECT * FROM Trust WHERE Trust.trust=1
+	) as TT ON User.uid=TT.uid0 
+	GROUP BY User.uid
+) as tmp1, (
+	SELECT User.uid, count(TT.uid1) as num2
+	FROM User LEFT JOIN (
+	    SELECT * FROM Trust WHERE Trust.trust=0
+	) as TT ON User.uid=TT.uid0 
+	GROUP BY User.uid
+) as tmp2 
+WHERE tmp1.uid=tmp2.uid and tmp1.uid != root.uid
+ORDER BY score DESC
+LIMIT 5;
+
+
+SELECT SUM(o2.number) as commonSales, o2.bid
+FROM Book, Ordering o1, Ordering o2
+WHERE o1.uid=o2.uid and o1.bid=Book.bid and Book.isbn='001' and o2.uid != 1
+GROUP BY o2.bid
+ORDER BY commonSales DESC
+;
+
+SELECT Book.isbn, Book.title, Publisher.name, Author.name, AVG(Feedback.score) as score
+FROM Book, Written, Author, Publisher, Feedback, Trust
+WHERE Book.bid = Written.bid and Written.aid = Author.aid and
+	Book.publisher = Publisher.pid and Feedback.bid = Book.bid and
+    Author.name LIKE "%%" and Publisher.name LIKE "%%" and
+	Book.subject LIKE "%%" and Book.title LIKE "%%"
+	and Trust.uid0 = Feedback.uid and Trust.uid1 = 1
+GROUP BY Book.bid
+ORDER BY Book.year DESC
+;
+
+
+
+
+SELECT Book.isbn, Book.title, Publisher.name as publisher, Author.name as author, AVG(Feedback.score) as score 
+FROM (Book left join Feedback on Book.bid=Feedback.bid) left join Trust on Feedback.uid=Trust.uid0, Written, Author, Publisher  
+WHERE Book.bid = Written.bid and Written.aid = Author.aid and 
+Book.publisher = Publisher.pid and  
+Author.name LIKE '%%' and Publisher.name LIKE '%%' and 
+Book.subject LIKE '%%' and Book.title LIKE '%%' and
+Trust.uid1 = 1  
+GROUP BY Book.bid, Author.name
+ORDER BY Book.year
+;
+
+SELECT Book.isbn, SUM(Ordering.number) as sales
+FROM Book left join Ordering on Book.bid=Ordering.bid
+GROUP BY Book.bid
+ORDER BY sales DESC;
+
+
+
+SELECT Author.name, SUM(Ordering.number) as sales
+FROM ((Book left join Ordering on Book.bid=Ordering.bid) 
+	left join Written on Written.bid=Book.bid),
+	Author
+WHERE Author.aid=Written.aid
+GROUP BY Author.aid
+ORDER BY sales DESC;
+
+
+SELECT Publisher.name, SUM(Ordering.number) as sales
+FROM (Book left join Ordering on Book.bid=Ordering.bid) 
+	left join Publisher on Publisher.pid=Book.publisher
+GROUP BY Publisher.pid
+ORDER BY sales DESC;
+
+SELECT * FROM Book, Author a1, Author a2, Written w1, Written w2
+WHERE Book.bid = w1.bid and Book.bid = w2.bid and w1.aid = a1.aid
+and w2.aid = a2.aid and a1.name='Mocker' and a2.name='Joker' 
+
+
+
+select * FROM
+(SELECT a1.aid as a1d, a1.name as n1, a2.aid as a2d, a2.name as n2 FROM Book, Author a1, Author a2, Written w1, Written w2
+WHERE Book.bid = w1.bid and Book.bid = w2.bid and w1.aid = a1.aid
+and w2.aid = a2.aid and a1.name='Mocker' ) as t1,
+(SELECT a3.aid as a3d, a3.name as n3, a4.aid as a4d FROM Book, Author a3, Author a4, Written w3, Written w4
+WHERE Book.bid = w3.bid and Book.bid = w4.bid and w3.aid = a3.aid
+and w4.aid = a4.aid and a3.name='Jun' ) as t2
+WHERE t1.a2d = t2.a4d and t1.a1d != t1.a2d and t2.a3d != a;
+
+
+SELECT Book.isbn, Book.title, Publisher.name as publisher, Author.name as author, AVG(Feedback.score) as score 
+SELECT * 
+FROM (Book left join Feedback on Book.bid=Feedback.bid) left join 
+	(select * FROM Trust WHERE Trust.uid1=1 ) as TTrust 
+	on Feedback.uid=TTrust.uid0, Written, Author, Publisher  
+WHERE Book.bid = Written.bid and Written.aid = Author.aid and 
+Book.publisher = Publisher.pid and  
+Author.name LIKE '%%' and Publisher.name LIKE '%%' and 
+Book.subject LIKE '%%' and Book.title LIKE '%%' 
+GROUP BY Book.bid, Author.name
+ORDER BY Book.year
+;
+
+
+
+
+SELECT * 
+FROM (Book left join Feedback on Book.bid=Feedback.bid) 
+	(select * FROM Trust WHERE Trust.uid1=1 ) as TTrust 
+	on Feedback.uid=TTrust.uid0, Written, Author, Publisher  
+WHERE Book.bid = Written.bid and Written.aid = Author.aid and 
+Book.publisher = Publisher.pid and  
+Author.name LIKE '%%' and Publisher.name LIKE '%%' and 
+Book.subject LIKE '%%' and Book.title LIKE '%%' 
+GROUP BY Book.bid, Author.name
+ORDER BY Book.year
+;
+
+
+
+SELECT Book.bid, Book.title, Publisher.name as publisher, Author.name as author, IFNULL(AVG(FT.score), 0) as score
+FROM Book left join 
+(SELECT * FROM Feedback, Trust WHERE Trust.uid0=Feedback.uid and Trust.uid1=1 and Trust.trust=1) as FT 
+on FT.bid=Book.bid, Publisher, Written, Author
+WHERE Publisher.pid=Book.publisher and Written.bid = Book.bid and Author.aid = Written.aid and
+Book.subject LIKE '%' and Book.title LIKE '%' and 
+Author.name LIKE '%' and Publisher.name LIKE '%'
+GROUP BY Book.bid, author 
+ORDER BY score DESC	
+; 
+
